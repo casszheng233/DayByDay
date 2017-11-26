@@ -43,7 +43,7 @@ def addTask(isFinished,userID,taskName,start,end):
             print 'successfullt insert'
             flash ("Inserted "+taskName +" successfully!")
         else:
-            flash （"task existed in the database")
+            flash ("task existed in the database")
     except:
         print "to do: not working"
 def checkTaskID(taskName,start,end):
@@ -58,4 +58,4 @@ def checkTaskID(taskName,start,end):
 
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)
-    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values ("{0}","{1}"，"{2}");'.format(userID,parent,child))
+    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values ("{0}","{1}", "{2}");'.format(userID,parent,child))

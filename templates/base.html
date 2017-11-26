@@ -52,7 +52,7 @@
 
     $("#add").click(function(){
       var divWrapper = $("<div class = 'addWrapper' id = 'field'>")
-      var intId = $("#task_popup div").length + 1;
+      var intId = $("#task_popup div").length;
       var testbox = $("<input type='text' name='subtask"+ intId +"'>")
 
       var removeButton = $("<input type=\"button\" class=\"remove\" value=\"-\" /><br>");
@@ -123,8 +123,6 @@
           End Date (YYYY-MM-DD): <input type='text' name='endDate'><br>
 
           <div id = "subtasks">
-          Subtask1: <input type='text' name='subtask1'><br>
-          Subtask2: <input type='text' name='subtask2'><br>
           </div>
           <input type="button" value="Add subtask" id = "add">
 
