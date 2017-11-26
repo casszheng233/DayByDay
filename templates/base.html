@@ -50,6 +50,23 @@
       pagecontainer: '#container2'
     });
 
+    $("#add").click(function(){
+      var divWrapper = $("<div class = 'addWrapper' id = 'field'>")
+      var intId = $("#task_popup div").length + 1;
+      var testbox = $("<input type='text' name='subtask"+ intId +"'>")
+
+      var removeButton = $("<input type=\"button\" class=\"remove\" value=\"-\" /><br>");
+       removeButton.click(function() {
+           $(this).parent().remove();
+       });
+       divWrapper.append(testbox);
+       divWrapper.append(removeButton);
+       $("#subtasks").append(divWrapper);
+
+
+    });
+
+
    });
 
    </script>
@@ -104,8 +121,12 @@
           Task Name: <input type='text' name='catName'><br>
           Start Date (YYYY-MM-DD): <input type='text' name='startDate'><br>
           End Date (YYYY-MM-DD): <input type='text' name='endDate'><br>
+
+          <div id = "subtasks">
           Subtask1: <input type='text' name='subtask1'><br>
-          Subtask2: <input type='text' name='subtask2'><br> 
+          Subtask2: <input type='text' name='subtask2'><br>
+          </div>
+          <input type="button" value="Add subtask" id = "add">
 
           <input type="submit" value="Submit">
         </form>
