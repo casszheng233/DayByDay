@@ -40,8 +40,12 @@
 
    $(document).ready(function() {
 
-     // Initialize the plugin
-    $('#my_popup').popup({
+    $('#cat_popup').popup({
+      backgroundactive: true,
+      pagecontainer: '#container2'
+    });
+
+    $('#task_popup').popup({
       backgroundactive: true,
       pagecontainer: '#container2'
     });
@@ -81,22 +85,32 @@
       {% block categories %} <p> Categories </p> {% endblock %}
       <p class = "spacer"></p>
 
-      <!-- Add Category, Task -->
-      <button class="my_popup_open">Add Category</button>
-
-      <div id="my_popup">
-
+      <!-- Add Category -->
+      <button class="cat_popup_open">Add Category</button>
+      <div id="cat_popup">
         <form method=POST action="{{ url_for('addCat') }}">
           Category Name: <input type='text' name='catName'><br>
           Category Color: <input type='text' name='catColor'><br>
           <input type="submit" value="Submit">
         </form>
-
-        <!-- Add an optional button to close the popup -->
-        <button class="my_popup_close">Close</button>
-
+        <button class="cat_popup_close">Close</button>
       </div>
+      <br>
 
+      <!-- Add Task -->
+      <button class="task_popup_open">Add Task</button>
+      <div id="task_popup">
+        <form method=POST action="{{ url_for('addTask') }}">
+          Task Name: <input type='text' name='catName'><br>
+          Start Date (YYYY-MM-DD): <input type='text' name='startDate'><br>
+          End Date (YYYY-MM-DD): <input type='text' name='endDate'><br>
+          Subtask1: <input type='text' name='subtask1'><br>
+          Subtask2: <input type='text' name='subtask2'><br> 
+
+          <input type="submit" value="Submit">
+        </form>
+        <button class="task_popup_close">Close</button>
+      </div>
       <br>
 
 

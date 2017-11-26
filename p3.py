@@ -17,14 +17,14 @@ def cursor(database=DATABASE):
 
 def getCats():
     curs = cursor(DATABASE)
-    curs.execute('select * from p_category;')
+    curs.execute('select * from category;')
     allCats = curs.fetchall()
     return allCats
 
 def addCat(name,color):
     curs = cursor(DATABASE)
     try:
-        curs.execute('insert into p_category(name, color) values ("{0}","{1}");'.format(name, color))
+        curs.execute('insert into category(name, color) values ("{0}","{1}");'.format(name, color))
         print "successful insert"
         flash("Inserted " + name + " successfully!")
     except:

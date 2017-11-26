@@ -29,7 +29,10 @@ def addCat():
     allCats = p3.getCats()
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
-
+@app.route('/addTask/', methods = ['POST'])
+def addTask():
+    allCats = p3.getCats()
+    return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 
 if __name__ == '__main__':
