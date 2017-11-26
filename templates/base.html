@@ -40,6 +40,30 @@
 
    $(document).ready(function() {
 
+     // toggle buttons when an 'add' window open
+     function allButtonsOff(bool){
+       $('.cat_popup_open').prop('disabled', bool);
+       $('.task_popup_open').prop('disabled', bool);
+     }
+
+     // callback events on opening or closing popups
+     function openPopups(selector, bool){
+       $(selector).popup({
+         onopen: function() {
+           allButtonsOff(bool);
+         }
+       });
+     }
+
+     function closePopups(selector, bool){
+       $(selector).popup({
+         onclose: function() {
+           allButtonsOff(bool);
+         }
+       });
+     }
+
+     // creating popups
     $('#cat_popup').popup({
       backgroundactive: true,
       pagecontainer: '#container2'
@@ -49,6 +73,12 @@
       backgroundactive: true,
       pagecontainer: '#container2'
     });
+
+    openPopups('#cat_popup',true);
+    closePopups('#cat_popup',false);
+    openPopups('#task_popup',true);
+    closePopups('#task_popup',false);
+
 
     $("#add").click(function(){
       var divWrapper = $("<div class = 'addWrapper' id = 'field'>")
