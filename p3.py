@@ -46,6 +46,7 @@ def addTask(isFinished,userID,taskName,start,end):
             flash ("task existed in the database")
     except:
         print "to do: not working"
+        
 def checkTaskID(taskName,start,end):
     curs = cursor(DATABASE)
     try:

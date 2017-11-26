@@ -113,19 +113,22 @@
       <br>
 
       <!-- select view for time -->
-      <select name="time">
-        <option value="day">Day View</option>
-        <option value="week">Week View</option>
-        <option value="month">Month View</option>
-      </select>
-      <p class = "spacer"></p>
+      <form method=POST action="{{ url_for('changeView') }}">
+          <select name="time" onchange="this.form.submit()">
+            {% block timeSelect %} {% endblock %}
+            <option value="day">Day View</option>
+            <option value="week">Week View</option>
+            <option value="month">Month View</option>
+          </select>
+          <p class = "spacer"></p>
 
-      <!-- select view for data -->
-      <select name="views">
-        <option value="checklist">Checklist View</option>
-        <option value="events">Events View</option>
-        <option value="log">Log View</option>
-      </select>
+        <!-- select view for data -->
+          <select name="views" onchange="this.form.submit()">
+            <option value="checklist">Checklist View</option>
+            <option value="events">Events View</option>
+            <option value="log">Log View</option>
+          </select>
+      </form>
       <p class = "spacer"></p>
 
       <!-- select which categories to view -->

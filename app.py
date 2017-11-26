@@ -49,6 +49,15 @@ def addTask():
         p3.addSubtask(userID,parID,childID)
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
+@app.route('/changeView/', methods = ['POST'])
+def changeView():
+    allCats = p3.getCats()
+    timeSelection = request.form['time']
+    dataSelection = request.form['views']
+    rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
+    print("got here")
+    return render_template('base_personalized.html', allCats =  allCats, rightPanel = rightpanel, database = DATABASE)
+
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',os.getuid())

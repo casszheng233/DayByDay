@@ -1,13 +1,22 @@
 {% extends "base.html" %}
+
+{% block timeSelect %}
+<option selected value = "week" > week </option>
+{% endblock %}
+
 {% block categories %}
+  <form>
+    <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
+    {% for cat in allCats %}
+    <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+    {% endfor %}
+  </form>
+{% endblock %}
 
-<form>
-  <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
-  {% for cat in allCats %}
-  <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
-  {% endfor %}
-</form>
 
 
+{% block rightPanel %}
+
+{{ rightPanel }}
 
 {% endblock %}
