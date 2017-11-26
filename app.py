@@ -38,6 +38,15 @@ def addTask():
     start = request.form['startDate']
     end = request.form['endDate']
     p3.addTask(isFinished,userID,taskName,start,end)
+    parID = p3.checkTaskID(taskName,start,end)['taskID']
+    subTask1 = request.form['subtask1']
+    print subTask1
+    subTask2 = request.form['subtask2']
+    if subTask1.split()!=[]:
+        print 'here'
+        p3.addTask(isFinished,userID,subTask1,start,end)
+        childID = p3.checkTaskID(subTask1,start,end)['taskID']
+        p3.addSubtask(userID,parID,childID)
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 if __name__ == '__main__':

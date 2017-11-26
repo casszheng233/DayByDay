@@ -36,8 +36,26 @@ def addCat(name,color):
 def addTask(isFinished,userID,taskName,start,end):
     curs = cursor(DATABASE)
     try:
-        curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
-        print 'successfullt insert'
-        flash ("Inserted "+taskName +" successfully!")
+        curs.execute('select * from task where taskName = "{0}" and start = "{1}" and end = "{2}";'.format(taskName,start,end))
+        row = curs.fetchone()
+        if row == None:
+            curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
+            print 'successfullt insert'
+            flash ("Inserted "+taskName +" successfully!")
+        else:
+            flash （"task existed in the database")
     except:
         print "to do: not working"
+def checkTaskID(taskName,start,end):
+    curs = cursor(DATABASE)
+    try:
+        #curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
+        curs.execute('select * from task where taskName = "{0}" and start = "{1}" and end = "{2}";'.format(taskName,start,end))
+        row = curs.fetchone()
+        return row
+    except:
+        print "to do: not working"
+
+def addSubtask(userID,parent,child):#this needs to be an id
+    curs = cursor(DATABASE)
+    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values ("{0}","{1}"，"{2}");'.format(userID,parent,child))
