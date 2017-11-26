@@ -8,6 +8,7 @@ DSN  = { 'host': 'localhost',
                    'passwd' :'G2O2HUprzpi6xUl',
                    'db': 'rpyktel_db'}
 
+
 DATABASE = 'rpyktel_db'
 
 def cursor(database=DATABASE):
@@ -30,3 +31,13 @@ def addCat(name,color):
     except:
         print "todo"
         print "did not work"
+
+
+def addTask(isFinished,userID,taskName,start,end):
+    curs = cursor(DATABASE)
+    try:
+        curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
+        print 'successfullt insert'
+        flash ("Inserted "+taskName +" successfully!")
+    except:
+        print "to do: not working"

@@ -32,8 +32,13 @@ def addCat():
 @app.route('/addTask/', methods = ['POST'])
 def addTask():
     allCats = p3.getCats()
+    isFinished = 0#default:not finished
+    taskName = request.form['catName']#should we change the name of this varchar
+    userID = 1#currently hard coded, need to change once we have the login page
+    start = request.form['startDate']
+    end = request.form['endDate']
+    p3.addTask(isFinished,userID,taskName,start,end)
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
-
 
 if __name__ == '__main__':
     app.debug = True
