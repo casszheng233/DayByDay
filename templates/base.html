@@ -81,10 +81,10 @@
 
 
     $("#add").click(function(){
-      var divWrapper = $("<div class = 'addWrapper' id = 'field'>")
+      var divWrapper = $("<div class = 'addWrapper' id = 'field'>");
       var intId = $("#task_popup div").length;
-      var testbox = $("<input type='text' name='subtask"+ intId +"'>")
-
+      var testbox = $("<input type='text' name='subtask"+ intId +"'>");
+      $("#num").val(intId);
       var removeButton = $("<input type=\"button\" class=\"remove\" value=\"-\" /><br>");
        removeButton.click(function() {
            $(this).parent().remove();
@@ -158,7 +158,7 @@
           <div id = "subtasks">
           </div>
           <input type="button" value="Add subtask" id = "add">
-
+          <input type = "hidden" name = "num" id = "num" value = "0">
           <input type="submit" value="Submit">
         </form>
         <button class="task_popup_close">Close</button>

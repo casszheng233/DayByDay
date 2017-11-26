@@ -39,14 +39,14 @@ def addTask():
     end = request.form['endDate']
     p3.addTask(isFinished,userID,taskName,start,end)
     parID = p3.checkTaskID(taskName,start,end)['taskID']
-    subTask1 = request.form['subtask1']
-    print subTask1
-    subTask2 = request.form['subtask2']
-    if subTask1.split()!=[]:
-        print 'here'
-        p3.addTask(isFinished,userID,subTask1,start,end)
-        childID = p3.checkTaskID(subTask1,start,end)['taskID']
-        p3.addSubtask(userID,parID,childID)
+    numSubtask = int(request.form['num'])
+    for i in range(1,numSubtask+1):
+            sub = request.form['subtask'+str(i)]
+            if sub.split()!=[]:
+                print 'subTask'+str(i)
+                p3.addTask(isFinished,userID,sub,start,end)
+                childID = p3.checkTaskID(sub,start,end)['taskID']
+                p3.addSubtask(userID,parID,childID)
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 @app.route('/changeView/', methods = ['POST'])
