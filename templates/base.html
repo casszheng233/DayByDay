@@ -6,7 +6,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="//cdn.rawgit.com/noelboss/featherlight/1.7.9/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.13/jquery.popupoverlay.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
     <style>
     #container{
@@ -38,7 +38,42 @@
 
    <script>
 
+   // write cookies for drop-downs
+   function timeChoose(){
+     choice = $('#time').find(":selected").val();
+     Cookies.set('timeChoice', choice);
+   }
+
+   function dataChoose(){
+     choice = $('#views').find(":selected").val();
+     Cookies.set('dataChoice', choice);
+   }
+
+
+
+
+
+
    $(document).ready(function() {
+
+     // a button for testing things
+     $("#btnSubmit").click(function(){
+        $("div.time_selector select").val("week");
+    });
+
+    // on page load, retrieve saved dropdown values
+     function loadDrops(){
+       timeChoice = Cookies.get('timeChoice');
+       dataChoice = Cookies.get('dataChoice');
+       if (timeChoice){
+         $("div.time_selector select").val(timeChoice);
+       }
+       if (dataChoice){
+         $("div.data_selector select").val(dataChoice);
+       }
+     }
+
+     loadDrops();
 
      // toggle buttons when an 'add' window open
      function allButtonsOff(bool){
@@ -114,21 +149,27 @@
 
       <!-- select view for time -->
       <form method=POST action="{{ url_for('changeView') }}">
-          <select name="time" onchange="this.form.submit()">
-            {% block timeSelect %}
-            <option value="day">Day View</option>
-            <option value="week">Week View</option>
-            <option value="month">Month View</option>
-            {% endblock %}
-          </select>
+            <!-- <select name="time" id="time" onchange="timeChoice()"> -->
+
+            <div class = "time_selector">
+            <select name="time" id="time" onchange="timeChoose(); this.form.submit();">
+              {% block timeSelect %}
+              <option value="day">Day View</option>
+              <option value="week">Week View</option>
+              <option value="month">Month View</option>
+              {% endblock %}
+            </select>
+          </div>
           <p class = "spacer"></p>
 
         <!-- select view for data -->
-          <select name="views" onchange="this.form.submit()">
+          <div class = "data_selector">
+          <select name="views" id="views" onchange="dataChoose(); this.form.submit();">
             <option value="checklist">Checklist View</option>
             <option value="events">Events View</option>
             <option value="log">Log View</option>
           </select>
+        </div>
       </form>
       <p class = "spacer"></p>
 
@@ -185,6 +226,9 @@
 
      </div>
   </div>
+  <input id = "btnSubmit" type="submit" value="Test"/>
+
+
 
 {% with messages = get_flashed_messages() %}
     {% if messages %}
