@@ -61,6 +61,21 @@
         $("div.time_selector select").val("week");
     });
 
+    function taskAddable(){
+      numberOfChecked = $('input:checkbox').length;
+      if (numberOfChecked == 1){
+        $('.task_popup_open').prop('disabled', true);
+      }
+      else{
+        $('.task_popup_open').prop('disabled', false);
+      }
+    }
+
+
+
+
+    taskAddable()
+
     // on page load, retrieve saved dropdown values
      function loadDrops(){
        timeChoice = Cookies.get('timeChoice');
