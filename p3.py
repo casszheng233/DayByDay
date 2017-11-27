@@ -24,12 +24,15 @@ def buildDropdown(timeSelection,dataSelection):
     return data
 
 
-def getCats():
+def getCats():#check this part, need to check for none value
     curs = cursor(DATABASE)
     curs.execute('select * from category;')
     allCats = curs.fetchall()
+    if allCats!=None:
     print allCats
-    return allCats
+        return allCats
+    else:
+        return []
 
 def addCat(name,color):
     curs = cursor(DATABASE)
@@ -42,13 +45,13 @@ def addCat(name,color):
         print "did not work"
 
 
-def addTask(isFinished,userID,taskName,start,end):
+def addTask(isFinished,userID,taskName,start,end,cat):
     curs = cursor(DATABASE)
     try:
         curs.execute('select * from task where taskName = "{0}" and start = "{1}" and end = "{2}";'.format(taskName,start,end))
         row = curs.fetchone()
         if row == None:
-            curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
+            curs.execute('insert into task(isFinished,userID,taskName,start,end,name) values ("{0}","{1}","{2}","{3}","{4}","{5}");'.format(isFinished,userID,taskName,start,end,cat))
             print 'successfullt insert'
             flash ("Inserted "+taskName +" successfully!")
         else:
@@ -69,3 +72,15 @@ def checkTaskID(taskName,start,end):
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)
     curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values ("{0}","{1}", "{2}");'.format(userID,parent,child))
+
+def checkcat():
+    curs = cursor(DATABASE)
+    try:
+        curs.execute('select name from category;')
+        rows = curs.fetchall()
+        if rows != None:
+            return [row['name'] for row in rows]
+        else:
+            return []
+    except:
+        print "cannot check category"

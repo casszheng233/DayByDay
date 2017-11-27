@@ -209,7 +209,9 @@
       <div id="task_popup">
         <form method=POST action="{{ url_for('addTask') }}">
           Task Category:
-          <select>
+
+          <select name="catOpt" id = "catOpt">
+            <option value="none">Not Specified</option>
             {% block add_dropdown %} {% endblock %}
           </select>
           <br>
