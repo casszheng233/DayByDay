@@ -17,7 +17,9 @@ def landingPage():
 @app.route('/')
 def fillCats():
     allCats = p3.getCats()
-    return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
+    dropCats = p3.getCats()
+    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
+    return render_template('base_personalized.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
 
 # routing for adding a category
 #todo: add error handling for if catName not unique, add a better way to select a color
@@ -27,6 +29,7 @@ def addCat():
     color = request.form['catColor']
     p3.addCat(name,color)
     allCats = p3.getCats()
+    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 @app.route('/addTask/', methods = ['POST'])
@@ -47,6 +50,7 @@ def addTask():
                 p3.addTask(isFinished,userID,sub,start,end)
                 childID = p3.checkTaskID(sub,start,end)['taskID']
                 p3.addSubtask(userID,parID,childID)
+    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 @app.route('/changeView/', methods = ['POST'])
@@ -55,8 +59,9 @@ def changeView():
     timeSelection = request.form['time']
     dataSelection = request.form['views']
     rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
+    dropdowns = p3.buildDropdown(timeSelection,dataSelection)
     print("got here")
-    return render_template('base_personalized.html', allCats =  allCats, rightPanel = rightpanel, database = DATABASE)
+    return render_template('base_personalized.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
 
 if __name__ == '__main__':
     app.debug = True

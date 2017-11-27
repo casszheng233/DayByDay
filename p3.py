@@ -16,10 +16,19 @@ def cursor(database=DATABASE):
     conn = dbconn2.connect(DSN)
     return conn.cursor(MySQLdb.cursors.DictCursor)
 
+def buildDropdown(timeSelection,dataSelection):
+    data = [['value="day"','Day View'],['value="week"','Week View'],['value="month"','Month View']]
+    # if timeSelection == "week":
+    #     data[1][0] = 'value="shit"'
+    #     print data
+    return data
+
+
 def getCats():
     curs = cursor(DATABASE)
     curs.execute('select * from category;')
     allCats = curs.fetchall()
+    print allCats
     return allCats
 
 def addCat(name,color):
@@ -46,7 +55,7 @@ def addTask(isFinished,userID,taskName,start,end):
             flash ("task existed in the database")
     except:
         print "to do: not working"
-        
+
 def checkTaskID(taskName,start,end):
     curs = cursor(DATABASE)
     try:

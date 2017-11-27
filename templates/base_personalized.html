@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 
+
 {% block timeSelect %}
-<option selected value = "week" > week </option>
+  <option value="day">Day View</option>
+  <option value="week">Week View</option>
+  <option value="month">Month View</option>
+
+
+  <!-- {% for select in timeSelect1 %}
+  <option {{select[0]}} > {{select[1]}}</option>
+  {% endfor %} -->
+
 {% endblock %}
+
+
 
 {% block categories %}
   <form>
@@ -11,6 +22,15 @@
     <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
     {% endfor %}
   </form>
+{% endblock %}
+
+
+
+
+{% block add_dropdown %}
+  {% for cat in allCats %}
+  <option value="{{cat['name']}}"> {{cat['name']}} </option>
+  {% endfor %}
 {% endblock %}
 
 

@@ -115,10 +115,11 @@
       <!-- select view for time -->
       <form method=POST action="{{ url_for('changeView') }}">
           <select name="time" onchange="this.form.submit()">
-            {% block timeSelect %} {% endblock %}
+            {% block timeSelect %}
             <option value="day">Day View</option>
             <option value="week">Week View</option>
             <option value="month">Month View</option>
+            {% endblock %}
           </select>
           <p class = "spacer"></p>
 
@@ -151,6 +152,12 @@
       <button class="task_popup_open">Add Task</button>
       <div id="task_popup">
         <form method=POST action="{{ url_for('addTask') }}">
+          Task Category:
+          <select>
+            {% block add_dropdown %} {% endblock %}
+          </select>
+          <br>
+
           Task Name: <input type='text' name='catName'><br>
           Start Date (YYYY-MM-DD): <input type='text' name='startDate'><br>
           End Date (YYYY-MM-DD): <input type='text' name='endDate'><br>
