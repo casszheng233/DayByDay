@@ -6,7 +6,7 @@ import p3
 app = Flask(__name__)
 app.secret_key = "whatever"
 
-DATABASE = 'rpyktel_db'
+DATABASE = 'czheng_db'
 
 # html base template, never seen
 @app.route('/base/')
