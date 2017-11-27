@@ -1,9 +1,9 @@
-drop table if exists category;
 drop table if exists event;
 drop table if exists logEntry;
-drop table if exists task;
 drop table if exists taskList;
+drop table if exists task;
 drop table if exists user;
+drop table if exists category;
 
 Create table user(
 	userID int not null auto_increment,
@@ -47,7 +47,9 @@ create table task(
 	INDEX (taskID),
 	start date,
 	`end` date,
+	name varchar(50),
 	primary key(taskID),
+	foreign key (name) references category(name),
 	foreign key (userID) references user(userID)
 )ENGINE = InnoDB;
 
