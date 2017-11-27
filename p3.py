@@ -4,12 +4,12 @@ import os
 from flask import (Flask, render_template, url_for, request, flash)
 
 DSN  = { 'host': 'localhost',
-                   'user' :  'rpyktel',
-                   'passwd' :'G2O2HUprzpi6xUl',
-                   'db': 'rpyktel_db'}
+                   'user' :  'czheng',
+                   'passwd' :'MkC8oFMvMUTXc9O',
+                   'db': 'czheng_db'}
 
 
-DATABASE = 'rpyktel_db'
+DATABASE = 'czheng_db'
 
 def cursor(database=DATABASE):
     DSN['db'] = database
@@ -29,7 +29,7 @@ def getCats():#check this part, need to check for none value
     curs.execute('select * from category;')
     allCats = curs.fetchall()
     if allCats!=None:
-    print allCats
+
         return allCats
     else:
         return []
@@ -68,6 +68,7 @@ def checkTaskID(taskName,start,end):
         return row
     except:
         print "to do: not working"
+
 
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)
