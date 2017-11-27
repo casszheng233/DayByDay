@@ -40,14 +40,15 @@ def addTask():
     userID = 1#currently hard coded, need to change once we have the login page
     start = request.form['startDate']
     end = request.form['endDate']
-    p3.addTask(isFinished,userID,taskName,start,end)
+    cat = request.form['catOpt']
+    p3.addTask(isFinished,userID,taskName,start,end,cat)
     parID = p3.checkTaskID(taskName,start,end)['taskID']
     numSubtask = int(request.form['num'])
     for i in range(1,numSubtask+1):
             sub = request.form['subtask'+str(i)]
             if sub.split()!=[]:
                 print 'subTask'+str(i)
-                p3.addTask(isFinished,userID,sub,start,end)
+                p3.addTask(isFinished,userID,sub,start,end,cat)
                 childID = p3.checkTaskID(sub,start,end)['taskID']
                 p3.addSubtask(userID,parID,childID)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
