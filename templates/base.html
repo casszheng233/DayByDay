@@ -56,11 +56,18 @@
 
    $(document).ready(function() {
 
+
+
      // a button for testing things
      $("#btnSubmit").click(function(){
         $("div.time_selector select").val("week");
     });
 
+    //CHECK
+    {% block scriptTasks %}
+    {% endblock %}
+
+    //when no categories exist, block user from adding tasks
     function taskAddable(){
       numberOfChecked = $('input:checkbox').length;
       if (numberOfChecked == 1){
@@ -70,11 +77,7 @@
         $('.task_popup_open').prop('disabled', false);
       }
     }
-
-
-
-
-    taskAddable()
+    taskAddable();
 
     // on page load, retrieve saved dropdown values
      function loadDrops(){
@@ -116,8 +119,8 @@
      // creating popups
     $('#cat_popup').popup({
       type: 'tooltip',
-      offsetleft: 400,
       backgroundactive: true,
+      offsetleft: 450,
       pagecontainer: '#container2'
     });
 
@@ -128,10 +131,19 @@
       pagecontainer: '#container2'
     });
 
+    $('#log_popup').popup({
+      type: 'tooltip',
+      offsetleft: 450,
+      backgroundactive: true,
+      pagecontainer: '#container2'
+    });
+
     openPopups('#cat_popup',true);
     closePopups('#cat_popup',false);
     openPopups('#task_popup',true);
     closePopups('#task_popup',false);
+    openPopups('#log_popup',true);
+    closePopups('#log_popup',false);
 
 
     $("#add").click(function(){
@@ -213,9 +225,8 @@
       <div id="task_popup">
         <form method=POST action="{{ url_for('addTask') }}">
           Task Category:
-
           <select name="catOpt" id = "catOpt">
-            <option value="none">Not Specified</option>
+	     <option value="none">Not Specified</option>
             {% block add_dropdown %} {% endblock %}
           </select>
           <br>
@@ -235,7 +246,18 @@
       <br>
 
 
-
+      <!-- Add Log -->
+      <button class="log_popup_open">Add/Update Log</button>
+      <div id="log_popup">
+        <form method=POST action="{{ url_for('addLog') }}">
+          Category Name: <input type='text' name='catName'><br>
+          Hours: <input type='text' name='hour'><br>
+          Task Date: <input type='text' name='taskDate'><br>
+          <input type="submit" value="Submit">
+        </form>
+        <button class="log_popup_close">Close</button>
+      </div>
+      <br>
 
     </div>
 

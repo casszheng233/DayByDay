@@ -16,7 +16,9 @@ Create table user(
 Create table category(
 	name varchar(50) not null,
 	color varchar(50),
-	primary key(name)
+	userID int,
+	primary key(name),
+	foreign key(userID) references user(userID)
 ) ENGINE = InnoDB;
 
 
@@ -32,11 +34,11 @@ Create table event(
 ) ENGINE = InnoDB;
 
 Create table logEntry(
-	taskID int,
+	name varchar(50),
 	hours int,
 	userID int,
-	taskDate date,
-	Foreign key (userID) references user(userID)
+	taskDate date not null,
+	Foreign key (name) references category(name)
 ) ENGINE = InnoDB;
 
 create table task(

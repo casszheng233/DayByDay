@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% block scriptTasks %}
+  {{ scriptTask }}
+{% endblock %}
 
 {% block timeSelect %}
   <option value="day">Day View</option>
@@ -23,7 +26,7 @@
     <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
     {% endfor %}
   </form>
-</div>
+  </div>
 {% endblock %}
 
 

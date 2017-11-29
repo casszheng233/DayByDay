@@ -17,8 +17,9 @@ def landingPage():
 # version with categories filled out
 @app.route('/')
 def fillCats():
-    allCats = p3.getCats()
-    dropCats = p3.getCats()
+    allCats = p3.getCats(1)
+    dropCats = p3.getCats(1)
+    # p3.rightPanelTask('hardcoded in function') # delete this line later Rosie
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
 
@@ -28,14 +29,14 @@ def fillCats():
 def addCat():
     name = request.form['catName']
     color = request.form['catColor']
-    p3.addCat(name,color)
-    allCats = p3.getCats()
+    p3.addCat(name,color,1)#last one is userID
+    allCats = p3.getCats(1)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 @app.route('/addTask/', methods = ['POST'])
 def addTask():
-    allCats = p3.getCats()
+    allCats = p3.getCats(1)#need to take care of userID
     isFinished = 0#default:not finished
     taskName = request.form['catName']#should we change the name of this varchar
     userID = 1#currently hard coded, need to change once we have the login page
@@ -55,15 +56,74 @@ def addTask():
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
+# TODO
+@app.route('/deleteTask/', methods = ['GET'])
+def deleteTask():
+    return render_template('base.html', database=DATABASE)
+
+@app.route('/addLog/',methods = ['POST'])
+def addLog():
+    allCats = p3.getCats(1)
+    cat = request.form['catName']
+    hours = request.form['hour']
+    taskDate = request.form['taskDate']
+    userID = 1 #hard coded, need to be changed
+    p3.addLog(cat,hours,userID,taskDate)
+    return render_template('base_personalized.html',allCats = allCats, database = DATABASE)
+
 @app.route('/changeView/', methods = ['POST'])
 def changeView():
-    allCats = p3.getCats()
+    allCats = p3.getCats(1)
     timeSelection = request.form['time']
     dataSelection = request.form['views']
-    rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
-    dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-    print("got here")
-    return render_template('base_personalized.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+
+    #routing for all of log
+    if (dataSelection == "log"):
+        if timeSelection == 'day':
+            dFormat = "MMM/DD/YYYY"
+            intervalGap = 1
+            intType = 'day'
+        elif timeSelection == 'week':
+            dFormat = "MMM/DD/YYYY"
+            intervalGap = 7
+            intType = 'day'
+        elif timeSelection == 'month':
+            dFormat = "MMM/YYYY"
+            intervalGap = 1
+            intType = 'month'
+        log = p3.checkLog(timeSelection)
+        logRecord = []
+        for rec in log:
+            recDate = rec['taskDate']
+            if recDate!=None:
+                cleanRec = [recDate.year,recDate.month,recDate.day]
+                cleanRec.append(int(rec['accum']))
+                logRecord.append(cleanRec)
+        return render_template('base_log.html',allCats = allCats, database = DATABASE,logs = logRecord,dFormat = dFormat,intervalGap = intervalGap )
+
+    # routing for day and checklist
+    if (timeSelection == "day" and dataSelection == "checklist"):
+        return redirect(url_for('day_checklist'))
+
+    else:
+        rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
+        dropdowns = p3.buildDropdown(timeSelection,dataSelection)
+        print("got here")
+        return render_template('base_personalized.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+
+@app.route('/day-checklist/', methods = ['GET','POST'])
+def day_checklist():
+    allCats = p3.getCats()
+
+    # timeSelection = request.form['time']
+    # dataSelection = request.form['views']
+    # dropdowns = p3.buildDropdown(timeSelection,dataSelection)
+    # rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
+    print "ha!"
+    data = p3.rightPanelTask("hardcoded")
+
+    return render_template('base_taskView.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+
 
 if __name__ == '__main__':
     app.debug = True

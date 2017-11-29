@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+
+
+
+{% block categories %}
+  <form>
+    <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
+    {% for cat in allCats %}
+    <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+    {% endfor %}
+  </form>
+{% endblock %}
+
+
+
+{% block rightPanel %}
+
+	<script type="text/javascript">
+	function loadLog(allLog,viewFormat,gap,intType){
+		window.onload = function () {
+			var chart = new CanvasJS.Chart("chartContainer", {
+				title: {
+					text: "Log View",
+					fontSize: 30
+				},
+				animationEnabled: true,
+				axisX: {
+					gridColor: "Silver",
+					tickColor: "silver",
+					interval:gap,
+					intervalType: intType,
+					valueFormatString: viewFormat//"DD/MMM/YYYY"
+				},
+				toolTip: {
+					shared: true
+				},
+				theme: "theme2",
+				axisY: {
+					gridColor: "Silver",
+					tickColor: "silver"
+				},
+				legend: {
+					verticalAlign: "center",
+					horizontalAlign: "right"
+				},
+				data: [//can also take a parameter to track different tasks
+				{
+					type: "line",
+					showInLegend: true,
+					lineThickness: 2,
+					name: "Accumulative Hours Spent",
+					markerType: "square",
+					color: "#F08080",
+					dataPoints : allLog
+				}
+				],
+				legend: {
+					cursor: "pointer",
+					itemclick: function (e) {
+						if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+							e.dataSeries.visible = false;
+						}
+						else {
+							e.dataSeries.visible = true;
+						}
+						chart.render();
+					}
+				}
+			});
+
+			chart.render();
+		}}
+		allLogRec = {{logs}};
+		dataRec = [];
+		intervalGap = {{intervalGap}};
+		intType = "{{intType}}";
+		dateFormat = "{{dFormat}}";
+		for (i = 0; i < allLogRec.length; i++){
+			rec = allLogRec[i];
+			dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+		}
+		loadLog(dataRec,dateFormat,intervalGap,intType);
+	</script>
+	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
+	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+		
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base_personalized.html" %}
+
+{% block rightPanel %}
+
+<script>
+
+// form of final data: [   ({dictionary of parentTask}, [ {subTask}, {subTask}, ... ]  ) ,   ...     ]
+
+// var data1 =     [[{'end': [1111, 11, 12], 'name': 'psetCS', 'isFinished': 0, 'cat': 'cs', 'start': [1111, 11, 11], 'taskID': '1'}, [{'isFinished': 0, 'end': [1111, 11, 12], 'name': 'a', 'taskID': '2'}, {'isFinished': 0, 'end': [1111, 11, 12], 'name': 'b', 'taskID': '3'}, {'isFinished': 0, 'end': [1111, 11, 12], 'name': 'c', 'taskID': '4'}]], [{'end': null, 'name': 'psetmath', 'isFinished': 0, 'cat': 'math', 'start': null, 'taskID': '6'}, [{'isFinished': 0, 'end': null, 'name': 'one', 'taskID': '7'}, {'isFinished': 0, 'end': null, 'name': 'two', 'taskID': '8'}, {'isFinished': 0, 'end': null, 'name': 'three', 'taskID': '9'}]]];
+
+
+var data = "{{ dataStruct }}";
+
+var data = data.replace(/&#39;/g,"\"");
+
+var dataStruct = JSON.parse(data);
+
+
+
+function placeSubtasks(dataStruct){
+for (j=0; j < dataStruct.length; j++ ){
+
+
+    taskDic = dataStruct[j][0];
+    console.log(JSON.stringify(dataStruct[j][0]) + "oi");
+    buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), true);
+
+
+    for (i=0; i < dataStruct[j][1].length; i++){
+        taskDic = dataStruct[j][1][i];
+        console.log(JSON.stringify(dataStruct[0][1][i]) + "hey");
+        buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), false);
+        }
+      }
+}
+
+placeSubtasks(dataStruct);
+
+
+function buildTask(taskID, category, name, isFin, due, isParent){
+  if (isParent){
+
+    $("#container2").append('<form method=POST action="{{ url_for("deleteTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
+    // var line0 = "Category: " + category + "<br>";
+    var line00 = "<input type='checkbox' name='taskCheck' value='task"+ taskID +"'> <b>" + name + "</b>  <br>"
+    // var line1 = "parentName: <b>" + name + "</b> <br>";
+    // var line2 = "isFin: " + isFin + "<br>";
+    // var line3 = "Due: " + due  + "<br>";
+    $("#task" + taskID.toString()).append(line00);
+
+
+  } else {
+
+    $("#container2").append('<form method=POST action="{{ url_for("deleteTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
+    // var line0 = "Category: " + category + "<br>";
+    var line00 = "<input type='checkbox' name='taskCheck' value='task"+ taskID +"'> " + name + " <br>"
+    // var line1 = "parentName: " + name + "<br>";
+    // var line2 = "isFin: " + isFin + "<br>";
+    // var line3 = "Due: " + due  + "<br>";
+    $("#task" + taskID.toString()).append(line00);
+
+  }
+
+
+
+}
+
+
+
+
+// buildTask( 1, "math", "pset1", "0", "1111-11-11" );
+
+
+
+</script>
+
+{% endblock %}
