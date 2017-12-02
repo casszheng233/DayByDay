@@ -1,36 +1,21 @@
-{% extends "base.html" %}
 
+<!DOCTYPE HTML>
+<html>
 
-
-
-{% block categories %}
-  <form>
-    <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
-    {% for cat in allCats %}
-    <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
-    {% endfor %}
-  </form>
-{% endblock %}
-
-
-
-{% block rightPanel %}
-
+<head>
 	<script type="text/javascript">
-	function loadLog(allLog,viewFormat,gap,intType){
+  function loadLog(allLog){
 		window.onload = function () {
 			var chart = new CanvasJS.Chart("chartContainer", {
 				title: {
-					text: "Log View",
+					text: "Site Traffic",
 					fontSize: 30
 				},
 				animationEnabled: true,
 				axisX: {
 					gridColor: "Silver",
 					tickColor: "silver",
-					interval:gap,
-					intervalType: intType,
-					valueFormatString: viewFormat//"DD/MMM/YYYY"
+					valueFormatString: "DD/MMM/YYYY"
 				},
 				toolTip: {
 					shared: true
@@ -52,7 +37,7 @@
 					name: "Accumulative Hours Spent",
 					markerType: "square",
 					color: "#F08080",
-					dataPoints : allLog
+          dataPoints : allLog
 				}
 				],
 				legend: {
@@ -71,18 +56,20 @@
 
 			chart.render();
 		}}
-		allLogRec = {{logs}};
-		dataRec = [];
-		intervalGap = {{intervalGap}};
-		intType = "{{intType}}";
-		dateFormat = "{{dFormat}}";
-		for (i = 0; i < allLogRec.length; i++){
-			rec = allLogRec[i];
-			dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
-		}
-		loadLog(dataRec,dateFormat,intervalGap,intType);
+    allLogRec = {{logs}};
+    dataRec = [];
+
+    for (i = 0; i < allLogRec.length; i++){
+      rec = allLogRec[i];
+      dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+    }
+    loadLog(dataRec);
 	</script>
 	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
-	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
-		
-{% endblock %}
+	<title>CanvasJS Example</title>
+</head>
+<body>
+	<div id="chartContainer" style="height: 400px; width: 100%;">
+	</div>
+</body>
+</html>

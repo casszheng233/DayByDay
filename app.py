@@ -2,6 +2,7 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
 import os
 import p3
+import datetime as dt
 
 app = Flask(__name__)
 app.secret_key = "whatever"
@@ -49,9 +50,20 @@ def addTask():
     for i in range(1,numSubtask+1):
             sub = request.form['subtask'+str(i)]
             if sub.split()!=[]:
+
+                startDT = dt.datetime.strptime(start,'%Y-%m-%d')
+                endDT = dt.datetime.strptime(end,'%Y-%m-%d')
+                numDays = endDT - startDT
+                length = numDays/numSubtask
+                daysFromStart = (length*i).days
+
+                endFormatted = startDT + dt.timedelta(days = daysFromStart)
+                endFormat = str(endFormatted)[:-9]
+
                 print 'subTask'+str(i)
-                p3.addTask(isFinished,userID,sub,start,end,cat)
-                childID = p3.checkTaskID(sub,start,end)['taskID']
+                print " "
+                p3.addTask(isFinished,userID,sub,start,endFormat,cat)
+                childID = p3.checkTaskID(sub,start,endFormat)['taskID']
                 p3.addSubtask(userID,parID,childID)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
@@ -104,25 +116,33 @@ def changeView():
     # routing for day and checklist
     if (timeSelection == "day" and dataSelection == "checklist"):
         return redirect(url_for('day_checklist'))
+    if (timeSelection == "week" and dataSelection == "checklist"):
+        return redirect(url_for('week_checklist'))
 
     else:
         rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
         dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-        print("got here")
+        # print("got here")
         return render_template('base_personalized.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
 
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():
-    allCats = p3.getCats()
+    allCats = p3.getCats(1)
 
     # timeSelection = request.form['time']
     # dataSelection = request.form['views']
     # dropdowns = p3.buildDropdown(timeSelection,dataSelection)
     # rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
-    print "ha!"
+    # print "ha!"
     data = p3.rightPanelTask("hardcoded")
 
-    return render_template('base_taskView.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    return render_template('base_taskView.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+
+@app.route('/week-checklist/', methods = ['GET','POST'])
+def week_checklist():
+    allCats = p3.getCats(1)
+    data = p3.rightPanelTask("hardcoded")
+    return render_template('base_task.html', allCats =  allCats, dataStruct = data, database = DATABASE)
 
 
 if __name__ == '__main__':
