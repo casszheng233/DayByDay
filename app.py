@@ -22,7 +22,8 @@ def fillCats():
     dropCats = p3.getCats(1)
     # p3.rightPanelTask('hardcoded in function') # delete this line later Rosie
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    return render_template('base_personalized.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
+    # return render_template('base_personalized.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
+    return redirect(url_for('day_checklist'))
 
 # routing for adding a category
 #todo: add error handling for if catName not unique, add a better way to select a color
@@ -47,6 +48,7 @@ def addTask():
     cat = request.form['catOpt']
     p3.addTask(isFinished,userID,taskName,start,end,cat)
     parID = p3.checkTaskID(taskName,start,end)['taskID']
+
     numSubtask = int(request.form['num'])
     for i in range(1,numSubtask+1):
             sub = request.form['subtask'+str(i)]
@@ -145,22 +147,19 @@ def day_checklist():
     # print "ha!"
     data = p3.rightPanelTask("hardcoded")
 
-    return render_template('base_taskView.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+    return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
 
 @app.route('/week-checklist/', methods = ['GET','POST'])
 def week_checklist():
     allCats = p3.getCats(1)
-    data = p3.rightPanelTask("hardcoded")
-    return render_template('base_task.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    data = p3.rightPanelTask("user id currently hardcoded")
+    return render_template('base_task_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
 
 # rosie: please make inheretence for the week task views...
-# day   checklist: base_taskView.html
-# week  checklist: base_task.html
-# month checklist: base_task_month.html
 @app.route('/month-checklist/', methods = ['GET','POST'])
 def month_checklist():
     allCats = p3.getCats(1)
-    data = p3.rightPanelTask("hardcoded")
+    data = p3.rightPanelTask("user id currently hardcoded")
     return render_template('base_task_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
 
 

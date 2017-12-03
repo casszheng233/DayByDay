@@ -54,27 +54,9 @@ def rightPanelTask(userID):
     clean3 = str(clean2).replace('None','0')
     return clean3
 
-    #form of final data: [   ({dictionary of parentTask}, [ {subTask}, {subTask}, ... ]  ) ,   ...     ]
-    # [({'end': datetime.date(1111, 11, 12), 'name': u'psetCS', 'isFinished': 0, 'cat': u'cs', 'start': datetime.date(1111, 11, 11), 'taskID': '1'},
-    #  [{'isFinished': 0, 'end': datetime.date(1111, 11, 12), 'name': u'a', 'taskID': '2'},
-    #   {'isFinished': 0, 'end': datetime.date(1111, 11, 12), 'name': u'b', 'taskID': '3'},
-    #   {'isFinished': 0, 'end': datetime.date(1111, 11, 12), 'name': u'c', 'taskID': '4'}]),
-    #
-    #   ({'end': None, 'name': u'psetmath', 'isFinished': 0, 'cat': u'math', 'start': None, 'taskID': '6'},
-    #   [{'isFinished': 0, 'end': None, 'name': u'one', 'taskID': '7'},
-    #   {'isFinished': 0, 'end': None, 'name': u'two', 'taskID': '8'},
-    #   {'isFinished': 0, 'end': None, 'name': u'three', 'taskID': '9'}])]
-
-
-    # {'end': datetime.date(1111, 11, 12), 'name': u'psetCS', 'isFinished': 0, 'cat': u'cs', 'start': datetime.date(1111, 11, 11), 'taskID': '1'}
-
-
 
 def buildDropdown(timeSelection,dataSelection):
     data = [['value="day"','Day View'],['value="week"','Week View'],['value="month"','Month View']]
-    # if timeSelection == "week":
-    #     data[1][0] = 'value="shit"'
-    #     print data
     return data
 
 
