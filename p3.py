@@ -93,7 +93,7 @@ def addTask(isFinished,userID,taskName,start,end,cat):
         else:
             flash ("task existed in the database")
     except:
-        print "to do: not working"
+        flash("check your input!")
 
 def deleteSubtask(taskID):
     curs = cursor(DATABASE)
@@ -118,13 +118,8 @@ def deleteTask(userID,taskName,start,end,cat):
     taskID = checkTaskID(taskName,start,end)
     if taskID is not None:
         deleteSubtask(taskID['taskID'])
-
     else:
         flash('Such task does not exist')
-
-
-
-
 
 def checkTaskID(taskName,start,end):
     curs = cursor(DATABASE)
@@ -134,6 +129,7 @@ def checkTaskID(taskName,start,end):
         row = curs.fetchone()
         return row
     except:
+        flash('please check your input')
         print "to do: not working"
 
 def tickBox(taskID):

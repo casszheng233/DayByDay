@@ -47,27 +47,29 @@ def addTask():
     end = request.form['endDate']
     cat = request.form['catOpt']
     p3.addTask(isFinished,userID,taskName,start,end,cat)
-    parID = p3.checkTaskID(taskName,start,end)['taskID']
+    checkID = p3.checkTaskID(taskName,start,end)
+    if checkID!=None:
+        parID = checkID['taskID']
 
-    numSubtask = int(request.form['num'])
-    for i in range(1,numSubtask+1):
-            sub = request.form['subtask'+str(i)]
-            if sub.split()!=[]:
+        numSubtask = int(request.form['num'])
+        for i in range(1,numSubtask+1):
+                sub = request.form['subtask'+str(i)]
+                if sub.split()!=[]:
 
-                startDT = dt.datetime.strptime(start,'%Y-%m-%d')
-                endDT = dt.datetime.strptime(end,'%Y-%m-%d')
-                numDays = endDT - startDT
-                length = numDays/numSubtask
-                daysFromStart = (length*i).days
+                    startDT = dt.datetime.strptime(start,'%Y-%m-%d')
+                    endDT = dt.datetime.strptime(end,'%Y-%m-%d')
+                    numDays = endDT - startDT
+                    length = numDays/numSubtask
+                    daysFromStart = (length*i).days
 
-                endFormatted = startDT + dt.timedelta(days = daysFromStart)
-                endFormat = str(endFormatted)[:-9]
+                    endFormatted = startDT + dt.timedelta(days = daysFromStart)
+                    endFormat = str(endFormatted)[:-9]
 
-                print 'subTask'+str(i)
-                print " "
-                p3.addTask(isFinished,userID,sub,start,endFormat,cat)
-                childID = p3.checkTaskID(sub,start,endFormat)['taskID']
-                p3.addSubtask(userID,parID,childID)
+                    print 'subTask'+str(i)
+                    print " "
+                    p3.addTask(isFinished,userID,sub,start,endFormat,cat)
+                    childID = p3.checkTaskID(sub,start,endFormat)['taskID']
+                    p3.addSubtask(userID,parID,childID)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base.html', allCats =  allCats, database = DATABASE)
 
