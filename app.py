@@ -22,7 +22,7 @@ def fillCats():
     dropCats = p3.getCats(1)
     # p3.rightPanelTask('hardcoded in function') # delete this line later Rosie
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    # return render_template('base_personalized.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
+    # return render_template('base.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
     return redirect(url_for('day_checklist'))
 
 # routing for adding a category
@@ -34,7 +34,7 @@ def addCat():
     p3.addCat(name,color,1)#last one is userID
     allCats = p3.getCats(1)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
+    return render_template('base.html', allCats =  allCats, database = DATABASE)
 
 # todo: move some of this logic to p3.py
 @app.route('/addTask/', methods = ['POST'])
@@ -69,7 +69,7 @@ def addTask():
                 childID = p3.checkTaskID(sub,start,endFormat)['taskID']
                 p3.addSubtask(userID,parID,childID)
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
+    return render_template('base.html', allCats =  allCats, database = DATABASE)
 
 # TODO
 @app.route('/tickTask/', methods = ['GET','POST'])
@@ -91,7 +91,7 @@ def addLog():
     taskDate = request.form['taskDate']
     userID = 1 #hard coded, need to be changed
     p3.addLog(cat,hours,userID,taskDate)
-    return render_template('base_personalized.html',allCats = allCats, database = DATABASE)
+    return render_template('base.html',allCats = allCats, database = DATABASE)
 
 @app.route('/changeView/', methods = ['POST'])
 def changeView():
@@ -135,7 +135,7 @@ def changeView():
         rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
         dropdowns = p3.buildDropdown(timeSelection,dataSelection)
         # print("got here")
-        return render_template('base_personalized.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+        return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
 
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():

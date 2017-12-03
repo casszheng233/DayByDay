@@ -50,10 +50,6 @@
    }
 
 
-
-
-
-
    $(document).ready(function() {
 
 
@@ -97,6 +93,7 @@
      function allButtonsOff(bool){
        $('.cat_popup_open').prop('disabled', bool);
        $('.task_popup_open').prop('disabled', bool);
+       $('.log_popup_open').prop('disabled',bool);
      }
 
      // callback events on opening or closing popups
@@ -206,8 +203,16 @@
       <p class = "spacer"></p>
 
       <!-- select which categories to view -->
-      {% block categories %} <p> Categories </p> {% endblock %}
-      <p class = "spacer"></p>
+      {% block categories %}
+      <div id = "categories">
+        <form>
+          <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
+          {% for cat in allCats %}
+          <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+          {% endfor %}
+        </form>
+        </div>
+      {% endblock %}
 
       <!-- Add Category -->
       <button class="cat_popup_open">Add Category</button>
@@ -228,7 +233,10 @@
           Task Category:
           <select name="catOpt" id = "catOpt">
 	     <option value="none">Not Specified</option>
-            {% block add_dropdown %} {% endblock %}
+       {% block add_dropdown %}
+       {% for cat in allCats %}
+       <option value="{{cat['name']}}"> {{cat['name']}} </option>
+       {% endfor %}{% endblock %}
           </select>
           <br>
 
@@ -241,6 +249,7 @@
           <input type="button" value="Add subtask" id = "add">
           <input type = "hidden" name = "num" id = "num" value = "0">
           <input type="submit" value="Submit">
+          <input type = "submit" formaction = "{{ url_for('deleteTask') }}", value = "Delete">
         </form>
         <button class="task_popup_close">Close</button>
       </div>
