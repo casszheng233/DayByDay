@@ -123,6 +123,18 @@ def checkTaskID(taskName,start,end):
     except:
         print "to do: not working"
 
+def tickBox(taskID):
+    curs = cursor(DATABASE)
+    curs.execute('select isFinished from task where taskID =' + taskID[4:])
+    row = curs.fetchone()
+    isFin = 1
+    if (row['isFinished']):
+        isFin = 0
+
+    curs2 = cursor(DATABASE)
+    print 'update task set isFinished=' + str(isFin) + ' where taskID = ' + taskID[4:] + ';'
+    curs.execute('update task set isFinished=' + str(isFin) + ' where taskID = ' + taskID[4:] + ';')
+
 
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)

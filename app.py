@@ -35,6 +35,7 @@ def addCat():
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
+# todo: move some of this logic to p3.py
 @app.route('/addTask/', methods = ['POST'])
 def addTask():
     allCats = p3.getCats(1)#need to take care of userID
@@ -69,9 +70,16 @@ def addTask():
     return render_template('base_personalized.html', allCats =  allCats, database = DATABASE)
 
 # TODO
-@app.route('/deleteTask/', methods = ['GET'])
-def deleteTask():
-    return render_template('base.html', database=DATABASE)
+@app.route('/tickTask/', methods = ['GET','POST'])
+def tickTask():
+    if request.method == 'POST':
+        value = request.form['taskCheck']
+        redirectVal = request.form['timeSelector']
+        p3.tickBox(value)
+
+        print value
+    return redirect(url_for(redirectVal))
+    # return render_template('base.html', database=DATABASE)
 
 @app.route('/addLog/',methods = ['POST'])
 def addLog():
@@ -118,6 +126,8 @@ def changeView():
         return redirect(url_for('day_checklist'))
     if (timeSelection == "week" and dataSelection == "checklist"):
         return redirect(url_for('week_checklist'))
+    if (timeSelection == "month" and dataSelection == "checklist"):
+        return redirect(url_for('month_checklist'))
 
     else:
         rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
@@ -128,7 +138,6 @@ def changeView():
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():
     allCats = p3.getCats(1)
-
     # timeSelection = request.form['time']
     # dataSelection = request.form['views']
     # dropdowns = p3.buildDropdown(timeSelection,dataSelection)
@@ -143,6 +152,16 @@ def week_checklist():
     allCats = p3.getCats(1)
     data = p3.rightPanelTask("hardcoded")
     return render_template('base_task.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+
+# rosie: please make inheretence for the week task views...
+# day   checklist: base_taskView.html
+# week  checklist: base_task.html
+# month checklist: base_task_month.html
+@app.route('/month-checklist/', methods = ['GET','POST'])
+def month_checklist():
+    allCats = p3.getCats(1)
+    data = p3.rightPanelTask("hardcoded")
+    return render_template('base_task_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
 
 
 if __name__ == '__main__':
