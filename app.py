@@ -15,6 +15,21 @@ DATABASE = 'rpyktel_db'
 def landingPage():
     return render_template('base.html', database=DATABASE)
 
+
+def legalDate(inputDate):
+    s = inputDate.split('-')
+    try:
+        if len(s)==3:
+            yr = int(s[0])
+            month = int(s[1])
+            day = int(s[2])
+            return (0<month and month<13 and 0<day and day<32)
+        else:
+            return False
+    except:
+        return False
+
+
 # version with categories filled out
 @app.route('/')
 def fillCats():
@@ -50,7 +65,7 @@ def addTask():
     start = request.form['startDate']
     end = request.form['endDate']
     cat = request.form['catOpt']
-    if taskName.split()!=[] and start.split()!=[] and end.split()!=[]:
+    if taskName.split()!=[] and legalDate(start) and legalDate(end):
         p3.addTask(isFinished,userID,taskName,start,end,cat)
         checkID = p3.checkTaskID(taskName,start,end)
         if checkID!=None:
@@ -75,7 +90,7 @@ def addTask():
                         childID = p3.checkTaskID(sub,start,endFormat)['taskID']
                         p3.addSubtask(userID,parID,childID)
     else:
-        flash('please enter all entries!')
+        flash('please check your entries!')
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base.html', allCats =  allCats, database = DATABASE)
 
@@ -114,8 +129,16 @@ def addLog():
     hours = request.form['hour']
     taskDate = request.form['taskDate']
     userID = 1 #hard coded, need to be changed
-    p3.addLog(cat,hours,userID,taskDate)
-    return render_template('base.html',allCats = allCats, database = DATABASE)
+    try:
+        if legalDate(taskDate) and int(hours)>0:
+            p3.addLog(cat,hours,userID,taskDate)
+        else:
+            flash('check your input')
+        return render_template('base.html',allCats = allCats, database = DATABASE)
+    except:
+        flash('check your input')
+        return render_template('base.html',allCats = allCats, database = DATABASE)
+
 
 @app.route('/changeView/', methods = ['POST'])
 def changeView():
