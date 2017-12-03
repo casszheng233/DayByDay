@@ -71,6 +71,22 @@ def addTask():
     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
     return render_template('base.html', allCats =  allCats, database = DATABASE)
 
+@app.route('/deleteTask/', methods = ['POST'])
+def deleteTask():
+    allCats = p3.getCats(1)#need to take care of userID
+    #isFinished = 0#default:not finished
+    taskName = request.form['catName']#should we change the name of this varchar
+    userID = 1#currently hard coded, need to change once we have the login page
+    start = request.form['startDate']
+    end = request.form['endDate']
+    cat = request.form['catOpt']
+
+    p3.deleteTask(userID,taskName,start,end,cat)
+
+    flash('the task has been deleted successfully')
+    return render_template('base.html', database=DATABASE,allCats = allCats)
+
+
 # TODO
 @app.route('/tickTask/', methods = ['GET','POST'])
 def tickTask():
@@ -147,7 +163,7 @@ def day_checklist():
     # print "ha!"
     data = p3.rightPanelTask("hardcoded")
 
-    return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+    return render_template('base_taskDay.html',allCats =  allCats, dataStruct = data, database = DATABASE)
 
 @app.route('/week-checklist/', methods = ['GET','POST'])
 def week_checklist():

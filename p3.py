@@ -3,17 +3,17 @@ import MySQLdb
 import os
 from flask import (Flask, render_template, url_for, request, flash)
 
-# DSN  = { 'host': 'localhost',
-#                    'user' :  'czheng',
-#                    'passwd' :'MkC8oFMvMUTXc9O',
-#                    'db': 'czheng_db'}
-# DATABASE = 'czheng_db'
-
 DSN  = { 'host': 'localhost',
-                   'user' :  'rpyktel',
-                   'passwd' :'G2O2HUprzpi6xUl',
-                   'db': 'rpyktel_db'}
-DATABASE = 'rpyktel_db'
+                   'user' :  'czheng',
+                   'passwd' :'MkC8oFMvMUTXc9O',
+                   'db': 'czheng_db'}
+DATABASE = 'czheng_db'
+
+# DSN  = { 'host': 'localhost',
+#                    'user' :  'rpyktel',
+#                    'passwd' :'G2O2HUprzpi6xUl',
+#                    'db': 'rpyktel_db'}
+# DATABASE = 'rpyktel_db'
 
 def cursor(database=DATABASE):
     DSN['db'] = database
@@ -95,6 +95,37 @@ def addTask(isFinished,userID,taskName,start,end,cat):
     except:
         print "to do: not working"
 
+def deleteSubtask(taskID):
+    curs = cursor(DATABASE)
+    curs.execute('select * from taskList where parentTaskID = "{0}";'.format(taskID))
+    rows = curs.fetchall()
+    print rows
+    print len(rows)
+    if len(rows)!=0:
+        for row in rows:
+            subTaskID = row['subTaskID']
+            print subTaskID
+            deleteSubtask(subTaskID)
+            curs.execute('delete from taskList where parentTaskID = "{0}" and subTaskID = "{1}";'.format(taskID,subTaskID))
+        curs.execute('delete from task where taskID = "{0}";'.format(taskID))
+    else:
+        curs.execute('delete from taskList where subTaskID = "{0}";'.format(taskID))
+        curs.execute('delete from task where taskID  = "{0}";'.format(taskID))
+
+
+def deleteTask(userID,taskName,start,end,cat):
+    curs = cursor(DATABASE)
+    taskID = checkTaskID(taskName,start,end)
+    if taskID is not None:
+        deleteSubtask(taskID['taskID'])
+
+    else:
+        flash('Such task does not exist')
+
+
+
+
+
 def checkTaskID(taskName,start,end):
     curs = cursor(DATABASE)
     try:
@@ -124,16 +155,20 @@ def addSubtask(userID,parent,child):#this needs to be an id
 
 def addLog(cat,hours,userID,taskDate):
     curs = cursor(DATABASE)
-    curs.execute('select * from logEntry where name = "{0}" and taskDate = "{1}" and userID = "{2}";'.format(cat,taskDate,userID))
+    curs.execute('select * from category where name = "{0}";'.format(cat))
     row = curs.fetchone()
-    if row == None:
-        curs.execute('insert into logEntry values ("{0}","{1}","{2}","{3}");'.format(cat,hours,userID,taskDate))
-        flash('log has been entered')
+    if row != None:
+        curs.execute('select * from logEntry where name = "{0}" and taskDate = "{1}" and userID = "{2}";'.format(cat,taskDate,userID))
+        row = curs.fetchone()
+        if row == None:
+            curs.execute('insert into logEntry values ("{0}","{1}","{2}","{3}");'.format(cat,hours,userID,taskDate))
+            flash('log has been entered')
+        else:
+            #existingHour = row['hours']
+            curs.execute('update logEntry set hours = hours + "{0}" where name = "{1}" and taskDate = "{2}" and userID = "{3}";'.format(hours,cat,taskDate,userID))
+            flash('log has been updated ')
     else:
-        #existingHour = row['hours']
-        curs.execute('update logEntry set hours = hours + "{0}" where name = "{1}" and taskDate = "{2}" and userID = "{3}";'.format(hours,cat,taskDate,userID))
-        flash('log has been updated ')
-
+        flash('please input an existing category')
 
 def checkLog(logType):
     curs = cursor(DATABASE)
