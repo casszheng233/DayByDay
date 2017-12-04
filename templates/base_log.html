@@ -3,16 +3,6 @@
 
 
 
-{% block categories %}
-  <form>
-    <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
-    {% for cat in allCats %}
-    <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
-    {% endfor %}
-  </form>
-{% endblock %}
-
-
 
 {% block rightPanel %}
 
@@ -84,5 +74,5 @@
 	</script>
 	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
 	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
-		
+
 {% endblock %}

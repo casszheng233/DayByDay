@@ -49,6 +49,26 @@
      Cookies.set('dataChoice', choice);
    }
 
+   var checkedBox = []
+   function checkCat(cbox){
+     if (cbox.checked == true){
+       checkedBox.push(cbox.value);
+     }
+     else{
+       checkedBox.splice( checkedBox.indexOf(cbox.value), 1 );
+     }
+     if (cbox.value!='allCats'){
+         $(".allCats").attr("checked",false);
+       }
+
+     else{
+       $(".cat").attr("checked",false);
+     }
+
+     Cookies.set('catChoice', checkedBox);
+     console.log(checkedBox);
+     this.form.submit();
+   }
 
    $(document).ready(function() {
 
@@ -206,9 +226,9 @@
       {% block categories %}
       <div id = "categories">
         <form>
-          <input type="checkbox" name="cat" value="allCats" checked> All Categories <br>
+          <input type="checkbox" name="cat" onchange="checkCat(this)" value="allCats" checked> All Categories <br>
           {% for cat in allCats %}
-          <input type="checkbox" name="cat" value="{{cat['name']}}"> <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+          <input type="checkbox" name="cat" onchange="checkCat(this)" value="{{cat['name']}}" > <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
           {% endfor %}
         </form>
         </div>
