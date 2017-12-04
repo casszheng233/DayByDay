@@ -20,7 +20,21 @@ def cursor(database=DATABASE):
     conn = dbconn2.connect(DSN)
     return conn.cursor(MySQLdb.cursors.DictCursor)
 
+def getCatColors(userID):
+    userID = 1 # currently hardcoded
+    curs = cursor(DATABASE)
+    curs.execute('select name, color from category where userID = {0};'.format(userID))
+    colorsDict = curs.fetchall()
+    d = {}
+    for obj in colorsDict:
+        d[str(obj['name'])] = str(obj['color'])
+    return d
+
+
 def rightPanelTask(userID):
+    getColors = getCatColors(1)
+
+
     userID = 1 # hardcoded right now
     curs = cursor(DATABASE)
     curs.execute('select distinct parentTaskID, subTaskID from taskList where userId = {0};'.format(userID))
@@ -39,13 +53,28 @@ def rightPanelTask(userID):
         curs1 = cursor(DATABASE)
         curs1.execute('select isFinished, taskName, taskID, start, end, name from task where taskID = {0}'.format(obj))
         parent = curs1.fetchall()
-        parentDic = {'name': str(parent[0]['taskName']), 'isFinished': parent[0]['isFinished'], 'taskID': str(parent[0]['taskID']), "start": parent[0]['start'], "end": parent[0]['end'], "cat": str(parent[0]['name'])}
+
+        parentDic = {'name': str(parent[0]['taskName']),
+                    'isFinished': parent[0]['isFinished'],
+                    'taskID': str(parent[0]['taskID']),
+                    'start': parent[0]['start'],
+                    'end': parent[0]['end'],
+                    'catColor': getColors[str(parent[0]['name'])],
+                    'cat': str(parent[0]['name'])}
+
         subDics = []
         for subID in taskDic[obj]:
             curs2 = cursor(DATABASE)
-            curs2.execute('select taskName, isFinished, taskID, end from task where taskID = {0};'.format(subID))
+            curs2.execute('select taskName, isFinished, taskID, end, name from task where taskID = {0};'.format(subID))
             subTask = curs2.fetchall()
-            subDic = {'name': str(subTask[0]['taskName']), 'isFinished': subTask[0]['isFinished'], 'taskID': str(subTask[0]['taskID']), "end": subTask[0]['end']}
+
+            subDic = {'name': str(subTask[0]['taskName']),
+                      'isFinished': subTask[0]['isFinished'],
+                      'taskID': str(subTask[0]['taskID']),
+                      'end': subTask[0]['end'],
+                      'catColor': getColors[str(parent[0]['name'])],
+                      'cat': str(parent[0]['name'])}
+
             subDics.append(subDic)
         taskHolder = [parentDic,subDics]
         finalData.append(taskHolder)

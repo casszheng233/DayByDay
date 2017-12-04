@@ -1,88 +1,37 @@
-{% extends "base_personalized.html" %}
+<!-- <script>
+$(document).ready(function() { -->
 
-{% block rightPanel %}
+{% extends "base_task.html" %}
 
-<script>
-$(document).ready(function() {
+{% block customize %}
 
-  //move this later to a 'day' template to inherit from
-  var today = new Date();
-  var d = today.getDate();
-  var m = today.getMonth()+1;
-  var y = today.getFullYear();
-  var date = y + "," + m + "," + d;
-  $('#dateinfo').append("Today is: " + y + "-" + m + "-" + d);
+  //general improvement: instead of pulling all tasks with dataStruct json, change so that SQL only returns
+  //tasks with current date.
 
-  //recieve the data structure containing task information from sql database
-  //maybe use ajax request instead?
-  var data = "{{ dataStruct }}";
-  var data = data.replace(/&#39;/g,"\"");
-  var dataStruct = JSON.parse(data);
-
-
-  //can put the two into helper functions
-  function buildTask(taskID, category, name, isFin, due, isParent){
-    if (isParent){
-      finBool = "";
-      if (parseInt(isFin)){
-        finBool = " checked ";
-      }
-
-      $("#container2").append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
-      // var line0 = "Category: " + category + "<br>";
-      var line99 = "<input type='hidden' value='day_checklist' name='timeSelector'>"
-      var line11 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>"
-      var line00 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> <b>" + name + "</b>  <br>"
-      // var line1 = "parentName: <b>" + name + "</b> <br>";
-      // var line2 = "isFin: " + isFin + "<br>";
-      var line3 = "Due: " + due  + "<br>";
-      $("#task" + taskID.toString()).append(line99 + line11 + line00 + line3);
-
-    } else {
-
-      finBool = "";
-      if (parseInt(isFin)){
-        finBool = " checked ";
-      }
-
-      $("#container2").append('<form method=POST id = ' + taskID  + ' action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
-      // var line0 = "Category: " + category + "<br>";
-      var line99 = "<input type='hidden' value='day_checklist' name='timeSelector'>"
-      var line11 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>"
-      var line00 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> " + name + " <br>"
-      // console.log(line00);
-      // var line1 = "parentName: " + name + "<br>";
-      // var line2 = "isFin: " + isFin + "<br>";
-      var line3 = "Due: " + due  + "<br>";
-      $("#task" + taskID.toString()).append(line99 + line11 + line00 + line3);
-
+  //Scott: Regarding style, should this helper function be placed within placeSubtasks?
+  //only build the task if its due date is the same as the current date
+  function placeSubtasksHelper(taskDic, isParent){
+    if (taskDic["end"].toString() == date){
+      buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, "container2", "day");
     }
   }
 
+  //process data structure of all tasks to find which dates to display
   function placeSubtasks(dataStruct){
-  for (j=0; j < dataStruct.length; j++ ){
+    //Extract parent task from data structure for processing
+    for (j=0; j < dataStruct.length; j++ ){
+      taskDic = dataStruct[j][0];
+      placeSubtasksHelper(taskDic, true);
 
-    taskDic = dataStruct[j][0];
-    if (taskDic["end"].toString() == date){
-      buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), true);
-    }
-
-    for (i=0; i < dataStruct[j][1].length; i++){
-        taskDic = dataStruct[j][1][i];
-
-        if (taskDic["end"].toString() !== date){
-          continue;
-        }
-
-        // console.log(JSON.stringify(dataStruct[0][1][i]) + "hey");
-        buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), false);
+      //Extract child subTasks from data structure for processing
+      for (i=0; i < dataStruct[j][1].length; i++){
+          taskDic = dataStruct[j][1][i];
+          placeSubtasksHelper(taskDic, false);
       }
     }
   }
 
   placeSubtasks(dataStruct);
-
-
 
 
 });

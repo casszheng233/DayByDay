@@ -249,7 +249,6 @@
           <input type="button" value="Add subtask" id = "add">
           <input type = "hidden" name = "num" id = "num" value = "0">
           <input type="submit" value="Submit">
-          <input type = "submit" formaction = "{{ url_for('deleteTask') }}", value = "Delete">
         </form>
         <button class="task_popup_close">Close</button>
       </div>
@@ -280,7 +279,7 @@
 
 
       {% block rightPanel %} {% endblock %}
-
+      {% block customize %} {% endblock %}
 
 
      </div>

@@ -1,95 +1,57 @@
-{% extends "base_personalized.html" %}
+<!-- <script>
+$(document).ready(function() { -->
 
-{% block rightPanel %}
+{% extends "base_task.html" %}
 
-<script>
-$(document).ready(function() {
+{% block customize %}
 
-  //move this later to a 'day' template to inherit from
-  var today = new Date();
-  var d = today.getDate();
-  var m = today.getMonth()+1;
-  var y = today.getFullYear();
-  var date = y + "," + m + "," + d;
-  $('#dateinfo').append("Today is: " + y + "-" + m + "-" + d);
-
-  var data = "{{ dataStruct }}";
-  var data = data.replace(/&#39;/g,"\"");
-  var dataStruct = JSON.parse(data);
-
-
-  //has an extra 'selector' field
-  function buildTask(taskID, category, name, isFin, due, isParent, selector){
-    if (isParent){
-      finBool = "";
-      if (parseInt(isFin)){
-        finBool = " checked ";
-      }
-
-      $('#' + selector).append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
-      // var line0 = "Category: " + category + "<br>";
-      var line99 = "<input type='hidden' value='week_checklist' name='timeSelector'>"
-      var line11 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>"
-      var line00 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> <b>" + name + "</b>  <br>"
-      // var line1 = "parentName: <b>" + name + "</b> <br>";
-      // var line2 = "isFin: " + isFin + "<br>";
-      // var line3 = "Due: " + due  + "<br>";
-      $("#task" + taskID.toString()).append(line99 + line11 + line00 );
-
-    } else {
-
-      finBool = "";
-      if (parseInt(isFin)){
-        finBool = " checked ";
-      }
-
-      // console.log("building subtask");
-      $('#' + selector).append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID +' data-due='+ due +'  data-isFin='+ isFin +' ' + taskID.toString() + ' style="border: 1px solid black;">   </div></form>')
-      // var line0 = "Category: " + category + "<br>";
-      var line99 = "<input type='hidden' value='week_checklist' name='timeSelector'>"
-      var line11 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>"
-      var line00 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> " + name + " <br>"
-      // var line1 = "parentName: " + name + "<br>";
-      // var line2 = "isFin: " + isFin + "<br>";
-      // var line3 = "Due: " + due  + "<br>";
-      $("#task" + taskID.toString()).append(line99 + line11 + line00 );
-    }
-  }
-
-  //week goes from last Sunday to Saturday
+  //the week we define goes from last Sunday to Saturday
+  //todo: daylights saving safe version
   function defineWeek(){
-    //todo: daylights saving safe version below
-    //d.setDate(d.getDate() + 1);
     var sunday = new Date();
     sunday.setDate(sunday.getDate() - sunday.getDay());
+
+    //'week' holds dates for comparison against SQL date values from tasks
+    //add Sunday
     dStr = sunday.toLocaleDateString().split('/');
     week = [dStr[2] + ',' + dStr[0] + ',' + dStr[1]];
+
+    //add rest of week
     for (i = 1; i < 7; i++){
-      d = new Date(sunday.getTime() + 86400000*i);
+      d = new Date(sunday.getTime() + 86400000*i); //robust against end-of-month changes
       dStr = d.toLocaleDateString().split('/');
       week.push(dStr[2] + ',' + dStr[0] + ',' + dStr[1] );
     }
     return week;
   }
 
+  //formats week names for display in header
+  function formatWeekNames(){
+    var week = defineWeek();
+    var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; //consider making current day name bold
+    var displaynames = [];
 
-  $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekTasks" ></table>')
-  var week = defineWeek();
-  var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  var displaynames = [];
-
-  for (i = 0; i < 7; i++){
-    var date = week[i].split(',');
-    displaynames.push(weeknames[i] + " " + date[1] + "/" + date[2]);
+    for (i = 0; i < 7; i++){
+      var date = week[i].split(',');
+      displaynames.push(weeknames[i] + " " + date[1] + "/" + date[2]);
+    }
+    return displaynames
   }
 
+  //create table to seperate days of week and contain tasks
+  $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekTasks" ></table>')
   $("#weekTasks").append('<tr id = headers>   </tr>');
+
+  //put days of week into headers
+  displaynames = formatWeekNames();
   for (i = 0; i < 7; i++){
     var header = '<th>' + displaynames[i] + '</th>';
     $("#headers").append(header);
   }
 
-  //can create this with a loop later
+  //can format this with a loop later
+  //creates row of table into which tasks will be placed
+  var week = defineWeek();
   $("#weekTasks").append('<tr> <td id = ' + week[0].split(',')[2] + ' > </td>' +
                               '<td id = ' + week[1].split(',')[2] + ' > </td>' +
                               '<td id = ' + week[2].split(',')[2] + ' > </td>' +
@@ -98,41 +60,47 @@ $(document).ready(function() {
                               '<td id = ' + week[5].split(',')[2] + ' > </td>' +
                               '<td id = ' + week[6].split(',')[2] + ' > </td>' +  '</tr>');
 
-  //for one task from data structure, if date on task matches a date to be displayed,
-  //create the task in the slot of the week table
+  //for one task from the data structure, if the date on task matches a date to be displayed,
+  //create the task in the corresponding slot of the week table
   function placeSubtasksHelper (j, dataStruct,date, selector){
-    taskDic = dataStruct[j][0];
-    if (taskDic["end"].toString() == date){
-      buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), true, selector);
+
+    //makes sure task's due date is the same as the relevant date
+    function placer(taskDic, isParent, selector){
+      if (taskDic["end"].toString() == date){
+        console.log("checkpoint 1: " + taskDic["catColor"])
+        console.log("checkpoint 1.5" + taskDic)
+        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "day");
+      }
     }
-    // console.log(JSON.stringify(dataStruct[j][0]) + "oi");
+    //executes placing for both parent tasks and subtasks
+    taskDic = dataStruct[j][0];
+    placer(taskDic, true, selector);
     for (i=0; i < dataStruct[j][1].length; i++){
         taskDic = dataStruct[j][1][i];
-        if (taskDic["end"].toString() == date){
-        // console.log(JSON.stringify(dataStruct[0][1][i]) + "hey");
-          buildTask(taskDic["taskID"], "dummy-math", taskDic["name"], taskDic["isFinished"].toString(), taskDic["end"].toString(), false, selector);
-        }
+        placer(taskDic,false, selector);
       }
   }
 
-
+  //iterate through all tasks and place them in the relevant week
   function placeSubtasks(dataStruct){
-    date = week[6]
-    for (j=0; j < dataStruct.length; j++ ){
-      //put this into loop later
-      //for each task, check whether it falls into any day of the week we're displaying
-      placeSubtasksHelper(j, dataStruct, week[0], week[0].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[1], week[1].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[2], week[2].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[3], week[3].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[4], week[4].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[5], week[5].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[6], week[6].split(',')[2]);
+
+    //makes sure task's due date is the same as the relevant date
+    function placer(taskDic, isParent, selector){
+      if (taskDic["end"].toString() == date){
+        console.log("checkpoint 2: " + taskDic["catColor"])
+        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "day");
       }
+    }
+
+    //iterate through all tasks
+    for (j=0; j < dataStruct.length; j++ ){
+      for (i=0; i < 7; i++){
+        //for each task, check whether it falls into any day of the week we're displaying
+        placeSubtasksHelper(j, dataStruct, week[i], week[i].split(',')[2]);
+      }
+    }
   }
-
   placeSubtasks(dataStruct);
-
 });
 
 
