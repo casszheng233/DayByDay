@@ -74,7 +74,6 @@ def addTask():
             for i in range(1,numSubtask+1):
                     sub = request.form['subtask'+str(i)]
                     if sub.split()!=[]:
-
                         startDT = dt.datetime.strptime(start,'%Y-%m-%d')
                         endDT = dt.datetime.strptime(end,'%Y-%m-%d')
                         numDays = endDT - startDT
@@ -103,10 +102,7 @@ def deleteTask():
     start = request.form['startDate']
     end = request.form['endDate']
     cat = request.form['catOpt']
-
     p3.deleteTask(userID,taskName,start,end,cat)
-
-    #flash('the task has been deleted successfully')
     return render_template('base.html', database=DATABASE,allCats = allCats)
 
 
@@ -146,29 +142,9 @@ def changeView():
     timeSelection = request.form['time']
     dataSelection = request.form['views']
 
-    #routing for all of log
+    #routing for log
     if (dataSelection == "log"):
-        if timeSelection == 'day':
-            dFormat = "MMM/DD/YYYY"
-            intervalGap = 1
-            intType = 'day'
-        elif timeSelection == 'week':
-            dFormat = "MMM/DD/YYYY"
-            intervalGap = 7
-            intType = 'day'
-        elif timeSelection == 'month':
-            dFormat = "MMM/YYYY"
-            intervalGap = 1
-            intType = 'month'
-        log = p3.checkLog(timeSelection)
-        logRecord = []
-        for rec in log:
-            recDate = rec['taskDate']
-            if recDate!=None:
-                cleanRec = [recDate.year,recDate.month,recDate.day]
-                cleanRec.append(int(rec['accum']))
-                logRecord.append(cleanRec)
-        return render_template('base_log.html',allCats = allCats, database = DATABASE,logs = logRecord,dFormat = dFormat,intervalGap = intervalGap )
+        return redirect(url_for('logview',timeSelection=timeSelection))
 
     # routing for day and checklist
     if (timeSelection == "day" and dataSelection == "checklist"):
@@ -181,8 +157,34 @@ def changeView():
     else:
         rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
         dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-        # print("got here")
         return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+
+@app.route('/logview/<timeSelection>', methods = ['GET','POST'])
+def logview(timeSelection):
+    allCats = p3.getCats(1)
+    dFormat = "MMM/DD/YYYY"
+    if timeSelection=='day':
+        dFormat = "MMM/DD/YYYY"
+        intervalGap = 1
+        intType = 'day'
+    elif timeSelection == 'week':
+        dFormat = "MMM/DD/YYYY"
+        intervalGap = 7
+        intType = 'day'
+    elif timeSelection == 'month':
+        dFormat = "MMM/YYYY"
+        intervalGap = 1
+        intType = 'month'
+    log = p3.checkLog(timeSelection)
+    logRecord = []
+    for rec in log:
+        recDate = rec['taskDate']
+        if recDate!=None:
+            cleanRec = [recDate.year,recDate.month,recDate.day]
+            cleanRec.append(int(rec['accum']))
+            logRecord.append(cleanRec)
+    return render_template('base_log.html',allCats = allCats, database = DATABASE,logs = logRecord,dFormat = dFormat,intervalGap = intervalGap )
+
 
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():
