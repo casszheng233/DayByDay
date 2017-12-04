@@ -106,7 +106,7 @@ def deleteTask():
 
     p3.deleteTask(userID,taskName,start,end,cat)
 
-    flash('the task has been deleted successfully')
+    #flash('the task has been deleted successfully')
     return render_template('base.html', database=DATABASE,allCats = allCats)
 
 

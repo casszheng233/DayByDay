@@ -118,6 +118,7 @@ def deleteTask(userID,taskName,start,end,cat):
     taskID = checkTaskID(taskName,start,end)
     if taskID is not None:
         deleteSubtask(taskID['taskID'])
+        flash('deleted')
     else:
         flash('Such task does not exist')
 
