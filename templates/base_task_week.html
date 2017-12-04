@@ -1,5 +1,5 @@
-<!-- <script>
-$(document).ready(function() { -->
+<script>
+$(document).ready(function() {
 
 {% extends "base_task.html" %}
 
@@ -62,48 +62,60 @@ $(document).ready(function() { -->
 
   //for one task from the data structure, if the date on task matches a date to be displayed,
   //create the task in the corresponding slot of the week table
-  function placeSubtasksHelper (j, dataStruct,date, selector){
+  function placeSubtasksHelper (j, dataStruct, date, selector){
 
     //makes sure task's due date is the same as the relevant date
     function placer(taskDic, isParent, selector){
       if (taskDic["end"].toString() == date){
-        console.log("checkpoint 1: " + taskDic["catColor"])
-        console.log("checkpoint 1.5" + taskDic)
-        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "day");
+        // console.log("checkpoint 1: " + taskDic["catColor"])
+        // console.log("checkpoint 1.5" + taskDic)
+        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "week");
+        // console.log(taskDic["taskID"])
       }
     }
     //executes placing for both parent tasks and subtasks
     taskDic = dataStruct[j][0];
+    console.log("first");
+    console.log(taskDic);
     placer(taskDic, true, selector);
     for (i=0; i < dataStruct[j][1].length; i++){
         taskDic = dataStruct[j][1][i];
+        console.log("second");
+        console.log(taskDic);
         placer(taskDic,false, selector);
       }
   }
 
   //iterate through all tasks and place them in the relevant week
   function placeSubtasks(dataStruct){
-
-    //makes sure task's due date is the same as the relevant date
-    function placer(taskDic, isParent, selector){
-      if (taskDic["end"].toString() == date){
-        console.log("checkpoint 2: " + taskDic["catColor"])
-        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "day");
-      }
-    }
+    var week = defineWeek();
 
     //iterate through all tasks
     for (j=0; j < dataStruct.length; j++ ){
-      for (i=0; i < 7; i++){
-        //for each task, check whether it falls into any day of the week we're displaying
-        placeSubtasksHelper(j, dataStruct, week[i], week[i].split(',')[2]);
-      }
+
+      placeSubtasksHelper(j, dataStruct, week[0], week[0].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[1], week[1].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[2], week[2].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[3], week[3].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[4], week[4].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[5], week[5].split(',')[2]);
+      placeSubtasksHelper(j, dataStruct, week[6], week[6].split(',')[2]);
+
+
+
+
+      // for (i=0; i < 7; i++){
+      //   //for each task, check whether it falls into any day of the week we're displaying
+      //   placeSubtasksHelper(j, dataStruct, week[i], week[i].split(',')[2]);
+      // }
+
+
     }
   }
   placeSubtasks(dataStruct);
+
+
 });
-
-
 </script>
 
 {% endblock %}

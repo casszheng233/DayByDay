@@ -3,17 +3,17 @@ import MySQLdb
 import os
 from flask import (Flask, render_template, url_for, request, flash)
 
-DSN  = { 'host': 'localhost',
-                   'user' :  'czheng',
-                   'passwd' :'MkC8oFMvMUTXc9O',
-                   'db': 'czheng_db'}
-DATABASE = 'czheng_db'
-
 # DSN  = { 'host': 'localhost',
-#                    'user' :  'rpyktel',
-#                    'passwd' :'G2O2HUprzpi6xUl',
-#                    'db': 'rpyktel_db'}
-# DATABASE = 'rpyktel_db'
+#                    'user' :  'czheng',
+#                    'passwd' :'MkC8oFMvMUTXc9O',
+#                    'db': 'czheng_db'}
+# DATABASE = 'czheng_db'
+
+DSN  = { 'host': 'localhost',
+                   'user' :  'rpyktel',
+                   'passwd' :'G2O2HUprzpi6xUl',
+                   'db': 'rpyktel_db'}
+DATABASE = 'rpyktel_db'
 
 def cursor(database=DATABASE):
     DSN['db'] = database

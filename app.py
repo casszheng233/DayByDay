@@ -1,4 +1,6 @@
-
+#CS304 Phase3 draft
+#app.py
+#Rosie Pyktel and Cassandra Zheng
 from flask import Flask, render_template, flash, request, redirect, url_for
 import os
 import p3
@@ -15,7 +17,7 @@ DATABASE = 'rpyktel_db'
 def landingPage():
     return render_template('base.html', database=DATABASE)
 
-
+# helper : check if the input date is legal or not
 def legalDate(inputDate):
     s = inputDate.split('-')
     try:
@@ -35,9 +37,6 @@ def legalDate(inputDate):
 def fillCats():
     allCats = p3.getCats(1)
     dropCats = p3.getCats(1)
-    # p3.rightPanelTask('hardcoded in function') # delete this line later Rosie
-    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    # return render_template('base.html', allCats =  allCats, add_dropdown = dropCats , database = DATABASE)
     return redirect(url_for('day_checklist'))
 
 # routing for adding a category
@@ -58,45 +57,50 @@ def addCat():
 # todo: move some of this logic to p3.py
 @app.route('/addTask/', methods = ['POST'])
 def addTask():
-    allCats = p3.getCats(1)#need to take care of userID
-    isFinished = 0#default:not finished
-    taskName = request.form['catName']#should we change the name of this varchar
-    userID = 1#currently hard coded, need to change once we have the login page
+
+    allCats = p3.getCats(1) #need to take care of userID
+    isFinished = 0 #default:not finished
+    taskName = request.form['catName'] #should we change the name of this varchar
+    userID = 1 #currently hard coded, need to change once we have the login page
     start = request.form['startDate']
     end = request.form['endDate']
     cat = request.form['catOpt']
-    if taskName.split()!=[] and legalDate(start) and legalDate(end):
-        p3.addTask(isFinished,userID,taskName,start,end,cat)
-        checkID = p3.checkTaskID(taskName,start,end)
-        if checkID!=None:
-            parID = checkID['taskID']
-            numSubtask = int(request.form['num'])
-            for i in range(1,numSubtask+1):
-                    sub = request.form['subtask'+str(i)]
-                    if sub.split()!=[]:
-                        startDT = dt.datetime.strptime(start,'%Y-%m-%d')
-                        endDT = dt.datetime.strptime(end,'%Y-%m-%d')
-                        numDays = endDT - startDT
-                        length = numDays/numSubtask
-                        daysFromStart = (length*i).days
+    try:
+        if taskName.split()!=[] and legalDate(start) and legalDate(end):
+            p3.addTask(isFinished,userID,taskName,start,end,cat)
+            checkID = p3.checkTaskID(taskName,start,end)
+            if checkID!=None:
+                parID = checkID['taskID']
+                numSubtask = int(request.form['num']) #check number of subtasks
+                for i in range(1,numSubtask+1):
+                        sub = request.form['subtask'+str(i)]
+                        if sub.split()!=[]:
+                            startDT = dt.datetime.strptime(start,'%Y-%m-%d')
+                            endDT = dt.datetime.strptime(end,'%Y-%m-%d')
+                            numDays = endDT - startDT
+                            length = numDays/numSubtask
+                            daysFromStart = (length*i).days
 
-                        endFormatted = startDT + dt.timedelta(days = daysFromStart)
-                        endFormat = str(endFormatted)[:-9]
+                            endFormatted = startDT + dt.timedelta(days = daysFromStart)
+                            endFormat = str(endFormatted)[:-9]
 
-                        print 'subTask'+str(i)
-                        print " "
-                        p3.addTask(isFinished,userID,sub,start,endFormat,cat)
-                        childID = p3.checkTaskID(sub,start,endFormat)['taskID']
-                        p3.addSubtask(userID,parID,childID)
-    else:
-        flash('please check your entries!')
-    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    return render_template('base.html', allCats =  allCats, database = DATABASE)
+                            print 'subTask'+str(i)
+                            print " "
+                            p3.addTask(isFinished,userID,sub,start,endFormat,cat)
+                            childID = p3.checkTaskID(sub,start,endFormat)['taskID']
+                            p3.addSubtask(userID,parID,childID)
+        else:
+            flash('please check your entries!')
+        # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
+        return render_template('base.html', allCats =  allCats, database = DATABASE)
+
+    except:
+        flash('something is wrong: check your entries!')
+        return render_template('base.html', allCats =  allCats, database = DATABASE)
 
 @app.route('/deleteTask/', methods = ['POST'])
 def deleteTask():
     allCats = p3.getCats(1)#need to take care of userID
-    #isFinished = 0#default:not finished
     taskName = request.form['catName']#should we change the name of this varchar
     userID = 1#currently hard coded, need to change once we have the login page
     start = request.form['startDate']
@@ -116,7 +120,6 @@ def tickTask():
 
         print value
     return redirect(url_for(redirectVal))
-    # return render_template('base.html', database=DATABASE)
 
 @app.route('/addLog/',methods = ['POST'])
 def addLog():
@@ -126,7 +129,7 @@ def addLog():
     taskDate = request.form['taskDate']
     userID = 1 #hard coded, need to be changed
     try:
-        if legalDate(taskDate) and int(hours)>0:
+        if legalDate(taskDate) and int(hours)>0: #check if input is legal
             p3.addLog(cat,hours,userID,taskDate)
         else:
             flash('check your input')
@@ -159,7 +162,7 @@ def changeView():
         dropdowns = p3.buildDropdown(timeSelection,dataSelection)
         return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
 
-@app.route('/logview/<timeSelection>', methods = ['GET','POST'])
+@app.route('/logview/<timeSelection>/', methods = ['GET','POST'])
 def logview(timeSelection):
     allCats = p3.getCats(1)
     dFormat = "MMM/DD/YYYY"
@@ -189,14 +192,8 @@ def logview(timeSelection):
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():
     allCats = p3.getCats(1)
-    # timeSelection = request.form['time']
-    # dataSelection = request.form['views']
-    # dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-    # rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
-    # print "ha!"
     data = p3.rightPanelTask("hardcoded")
-
-    return render_template('base_taskDay.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+    return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
 
 @app.route('/week-checklist/', methods = ['GET','POST'])
 def week_checklist():

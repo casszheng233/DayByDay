@@ -34,16 +34,16 @@ $(document).ready(function() {
     //determines whether name of task should be rendered bold, indicating it is a parent
     nameParent = name;
     if (isParent){
-      nameParent = "<b>" + name + "</b>"
+      nameParent = "<b>" + name + "</b>";
     }
-    nameParent = "<font color=" + catColor +  ">" + nameParent + "</font>"
+    nameParent = "<font color=" + catColor +  ">" + nameParent + "</font>";
 
     //building each
-    $('#' + selector).append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID + ' style="border: 1px solid black;">   </div></form>')
+    $('#' + selector).append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID + ' style="border: 1px solid black;">   </div></form>');
     // var line0 ="Cat: " + category + "<br>";
-    var line1 = "<input type='hidden' value='"+ timeChoice +"_checklist' name='timeSelector'>"
-    var line2 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>"
-    var line3 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> " + nameParent + "  <br>"
+    var line1 = "<input type='hidden' value='"+ timeChoice +"_checklist' name='timeSelector'>";
+    var line2 = "<input type='hidden' value='task"+ taskID +"' name='taskCheck'>";
+    var line3 = "<input type='checkbox'"+ finBool +" onchange='this.form.submit();' name='taskCheck' value='task"+ taskID +"'> " + nameParent + "  <br>";
     $("#task" + taskID.toString()).append(line1 + line2 + line3 );
   }
 
