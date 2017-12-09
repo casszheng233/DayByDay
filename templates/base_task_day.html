@@ -10,7 +10,7 @@ $(document).ready(function() { -->
 
   //Scott: Regarding style, should this helper function be placed within placeSubtasks?
   //only build the task if its due date is the same as the current date
-  <script>
+
   function placeSubtasksHelper(taskDic, isParent){
     if (taskDic["end"].toString() == date){
       buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, "container2", "day");
@@ -31,7 +31,6 @@ $(document).ready(function() { -->
       }
     }
   }
-
   placeSubtasks(dataStruct);
 
 

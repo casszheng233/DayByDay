@@ -1,10 +1,10 @@
-
+<!-- <script>
+$(document).ready(function() { -->
 
 {% extends "base_task.html" %}
 
 {% block customize %}
-<script>
-$(document).ready(function() {
+
   //the week we define goes from last Sunday to Saturday
   //todo: daylights saving safe version
   function defineWeek(){
@@ -75,13 +75,13 @@ $(document).ready(function() {
     }
     //executes placing for both parent tasks and subtasks
     taskDic = dataStruct[j][0];
-    console.log("first");
-    console.log(taskDic);
+    // console.log("first");
+    // console.log(taskDic);
     placer(taskDic, true, selector);
     for (i=0; i < dataStruct[j][1].length; i++){
         taskDic = dataStruct[j][1][i];
-        console.log("second");
-        console.log(taskDic);
+        // console.log("second");
+        // console.log(taskDic);
         placer(taskDic,false, selector);
       }
   }

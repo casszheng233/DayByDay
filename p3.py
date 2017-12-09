@@ -23,7 +23,7 @@ def cursor(database=DATABASE):
 def getCatColors(userID):
     userID = 1 # currently hardcoded
     curs = cursor(DATABASE)
-    curs.execute('select name, color from category where userID = {0};'.format(userID))
+    curs.execute('select name, color from category where userID = %s;',(userID,))
     colorsDict = curs.fetchall()
     d = {}
     for obj in colorsDict:
@@ -33,11 +33,9 @@ def getCatColors(userID):
 
 def rightPanelTask(userID):
     getColors = getCatColors(1)
-
-
     userID = 1 # hardcoded right now
     curs = cursor(DATABASE)
-    curs.execute('select distinct parentTaskID, subTaskID from taskList where userId = {0};'.format(userID))
+    curs.execute('select distinct parentTaskID, subTaskID from taskList where userId = %s;',(userID,))
     buildAssociation = curs.fetchall()
     finalData = []
     taskDic = {}
@@ -51,7 +49,7 @@ def rightPanelTask(userID):
     for obj in taskDic.keys():
         taskHolder = []
         curs1 = cursor(DATABASE)
-        curs1.execute('select isFinished, taskName, taskID, start, end, name from task where taskID = {0}'.format(obj))
+        curs1.execute('select isFinished, taskName, taskID, start, end, name from task where taskID = %s',(obj,))
         parent = curs1.fetchall()
 
         parentDic = {'name': str(parent[0]['taskName']),
@@ -65,7 +63,7 @@ def rightPanelTask(userID):
         subDics = []
         for subID in taskDic[obj]:
             curs2 = cursor(DATABASE)
-            curs2.execute('select taskName, isFinished, taskID, end, name from task where taskID = {0};'.format(subID))
+            curs2.execute('select taskName, isFinished, taskID, end, name from task where taskID = %s;',(subID,))
             subTask = curs2.fetchall()
 
             subDic = {'name': str(subTask[0]['taskName']),
@@ -91,7 +89,7 @@ def buildDropdown(timeSelection,dataSelection):
 
 def getCats(userID):#check this part, need to check for none value
     curs = cursor(DATABASE)
-    curs.execute('select * from category where userID = "{0}";'.format(userID))
+    curs.execute('select * from category where userID = %s;',(userID,))
     allCats = curs.fetchall()
     if allCats!=None:
 
@@ -102,7 +100,7 @@ def getCats(userID):#check this part, need to check for none value
 def addCat(name,color,userID):
     curs = cursor(DATABASE)
     try:
-        curs.execute('insert into category(name, color,userID) values ("{0}","{1}","{2}");'.format(name, color,userID))
+        curs.execute('insert into category(name, color,userID) values (%s,%s,%s);',(name, color,userID,))
         print "successful insert"
         flash("Inserted " + name + " successfully!")
     except:
@@ -113,10 +111,10 @@ def addCat(name,color,userID):
 def addTask(isFinished,userID,taskName,start,end,cat):
     curs = cursor(DATABASE)
     try:
-        curs.execute('select * from task where taskName = "{0}" and start = "{1}" and end = "{2}" and userID = "{3}";'.format(taskName,start,end,userID))
+        curs.execute('select * from task where taskName = %s and start = %s and end = %s and userID = %s;',(taskName,start,end,userID,))
         row = curs.fetchone()
         if row == None:
-            curs.execute('insert into task(isFinished,userID,taskName,start,end,name) values ("{0}","{1}","{2}","{3}","{4}","{5}");'.format(isFinished,userID,taskName,start,end,cat))
+            curs.execute('insert into task(isFinished,userID,taskName,start,end,name) values (%s,%s,%s,%s,%s,%s);',(isFinished,userID,taskName,start,end,cat,))
             print 'successfullt insert'
             flash ("Inserted "+taskName +" successfully!")
         else:
@@ -126,7 +124,7 @@ def addTask(isFinished,userID,taskName,start,end,cat):
 
 def deleteSubtask(taskID):
     curs = cursor(DATABASE)
-    curs.execute('select * from taskList where parentTaskID = "{0}";'.format(taskID))
+    curs.execute('select * from taskList where parentTaskID = %s;',(taskID,))
     rows = curs.fetchall()
     print rows
     print len(rows)
@@ -135,11 +133,11 @@ def deleteSubtask(taskID):
             subTaskID = row['subTaskID']
             print subTaskID
             deleteSubtask(subTaskID)
-            curs.execute('delete from taskList where parentTaskID = "{0}" and subTaskID = "{1}";'.format(taskID,subTaskID))
-        curs.execute('delete from task where taskID = "{0}";'.format(taskID))
+            curs.execute('delete from taskList where parentTaskID = %s and subTaskID = %s;',(taskID,subTaskID,))
+        curs.execute('delete from task where taskID = %s;',(taskID,))
     else:
-        curs.execute('delete from taskList where subTaskID = "{0}";'.format(taskID))
-        curs.execute('delete from task where taskID  = "{0}";'.format(taskID))
+        curs.execute('delete from taskList where subTaskID = %s;',(taskID,))
+        curs.execute('delete from task where taskID  = %s;',(taskID,))
 
 
 def deleteTask(userID,taskName,start,end,cat):
@@ -155,7 +153,7 @@ def checkTaskID(taskName,start,end):
     curs = cursor(DATABASE)
     try:
         #curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
-        curs.execute('select * from task where taskName = "{0}" and start = "{1}" and end = "{2}";'.format(taskName,start,end))
+        curs.execute('select * from task where taskName = %s and start = %s and end = %s;',(taskName,start,end,))
         row = curs.fetchone()
         return row
     except:
@@ -177,38 +175,62 @@ def tickBox(taskID):
 
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)
-    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values ("{0}","{1}", "{2}");'.format(userID,parent,child))
+    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,%s);',(userID,parent,child,))
 
 def addLog(cat,hours,userID,taskDate):
     curs = cursor(DATABASE)
-    curs.execute('select * from category where name = "{0}";'.format(cat))
+    curs.execute('select * from category where name = %s;',(cat,))
     row = curs.fetchone()
     if row != None:
-        curs.execute('select * from logEntry where name = "{0}" and taskDate = "{1}" and userID = "{2}";'.format(cat,taskDate,userID))
+        curs.execute('select * from logEntry where name = %s and taskDate = %s and userID = %s;',(cat,taskDate,userID,))
         row = curs.fetchone()
         if row == None:
-            curs.execute('insert into logEntry values ("{0}","{1}","{2}","{3}");'.format(cat,hours,userID,taskDate))
+            curs.execute('insert into logEntry values (%s,%s,%s,%s);',(cat,hours,userID,taskDate,))
             flash('log has been entered')
         else:
             #existingHour = row['hours']
-            curs.execute('update logEntry set hours = hours + "{0}" where name = "{1}" and taskDate = "{2}" and userID = "{3}";'.format(hours,cat,taskDate,userID))
+            curs.execute('update logEntry set hours = hours + %s where name = %s and taskDate = %s and userID = %s;',(hours,cat,taskDate,userID,))
             flash('log has been updated ')
     else:
         flash('please input an existing category')
 
-def checkLog(logType):
+def checkLog(logType,userID):
     curs = cursor(DATABASE)
     if logType == 'day':
-        curs.execute('select taskDate,sum(hours) as accum from logEntry group by taskDate;')
+        curs.execute('select taskDate,sum(hours) as accum from logEntry where userID = %s group by taskDate;',(userID,))
     #if logType == 'day':#per week
     #    curs.execute('select taskDate, sum(hours) as accum from logEntry where taskDate between date_sub(now(),INTERVAL 1 WEEK) and now() group by taskDate;')
     if logType == 'week':
-        curs.execute('select taskDate, sum(hours) as accum from logEntry group by YEARWEEK(taskDate);')
+        curs.execute('select taskDate, sum(hours) as accum from logEntry where userID = %s group by YEARWEEK(taskDate);',(userID,))
     if logType == 'month':
-        curs.execute('select taskDate, sum(hours) as accum from logEntry group by YEAR(taskDate), MONTH(taskDate);')
+        curs.execute('select taskDate, sum(hours) as accum from logEntry where userID = %s group by YEAR(taskDate), MONTH(taskDate);',(userID,))
     rows = curs.fetchall()
     if rows!=None:
         return rows
     else:
         flash('no log record')
         return [{'taskDate':'','accum':''}]
+
+def addEvent(userID,eventName,eventDate,start,end):
+
+    curs = cursor(DATABASE)
+    curs.execute('select * from event where eventDate = %s and (%s between start and end or %s between start and end);',(eventDate,start,end,))
+    row = curs.fetchone()
+    if row == None:
+        curs.execute('insert into event (userID,eventDate,start,end,name) values (%s,%s,%s,%s,%s);',(userID,eventDate,start,end,eventName,))
+        print 'successfullt insert'
+        flash ("Inserted "+eventName +" successfully!")
+    else:
+        flash('there seems to be a scheduling conflict')
+    # try:
+    #     #check if there exists any preexisting event
+    #     curs.execute('select * from event where eventDate = %s where %s bewteen start and end or %s bewteen start and end;',(eventDate,start,end,))
+    #     row = curs.fetchone()
+    #     if row == None:
+    #         curs.execute('insert into event (userID,eventDate,start,end,name) values (%s,%s,%s,%s);',(userID,eventDate,start,end,eventName,))
+    #         print 'successfullt insert'
+    #         flash ("Inserted "+eventName +" successfully!")
+    #     else:
+    #         flash ("task existed in the database")
+    # except:
+    #     flash("check your input!")
