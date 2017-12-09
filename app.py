@@ -178,7 +178,7 @@ def logview(timeSelection):
         dFormat = "MMM/YYYY"
         intervalGap = 1
         intType = 'month'
-    log = p3.checkLog(timeSelection)
+    log = p3.checkLog(timeSelection,1)#TODO:userID is hard coded
     logRecord = []
     for rec in log:
         recDate = rec['taskDate']
@@ -207,6 +207,38 @@ def month_checklist():
     allCats = p3.getCats(1)
     data = p3.rightPanelTask("user id currently hardcoded")
     return render_template('base_task_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+
+@app.route('/addEvent/',methods = ['POST'])
+def addEvent():
+    allCats = p3.getCats(1) #need to take care of userID
+    eventName = request.form['eventName'] #should we change the name of this varchar
+    userID = 1 #currently hard coded, need to change once we have the login page
+    eventDate = request.form['eventDate']
+    start = request.form['startTime']
+    end = request.form['endTime']
+
+    if eventName.split()!=[] and legalDate(eventDate):
+        p3.addEvent(userID,eventName,eventDate,start,end)
+    return render_template('base.html', allCats =  allCats, database = DATABASE)
+
+
+
+    # try:
+    #     if eventName.split()!=[] and legalDate(eventDate):
+    #         p3.addEvent(userID,eventName,eventDate,start,end)
+    #
+    #
+    #     else:
+    #         flash('please check your entries!')
+    #     # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
+    #     return render_template('base.html', allCats =  allCats, database = DATABASE)
+    #
+    # except:
+    #     flash('something is wrong: check your entries!')
+    #     return render_template('base.html', allCats =  allCats, database = DATABASE)
+    #
+    #
+
 
 
 if __name__ == '__main__':

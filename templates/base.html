@@ -49,31 +49,42 @@
      Cookies.set('dataChoice', choice);
    }
 
-   var checkedBox = []
-   function checkCat(cbox){
-     if (cbox.checked == true){
-       checkedBox.push(cbox.value);
-     }
-     else{
-       checkedBox.splice( checkedBox.indexOf(cbox.value), 1 );
-     }
-     if (cbox.value!='allCats'){
-         $(".allCats").attr("checked",false);
-       }
+   //if any cats checked, uncheck allCats
+   //if no cats checked, check allCats
+   //if allCats checked, uncheck others
+   function checkCat(catTick, notOnLoad){
+     var $inputs = $('#catTickForm :input');
+     var ids = [];
+     $inputs.each(function (index){
+         ids.push( [$(this).attr('id') , $('#' + $(this).attr('id').replace(" ", "\\ ")).prop('checked')])
+     });
 
-     else{
-       $(".cat").attr("checked",false);
+     //don't allow user to select 0 categories, turn on 'all categories' if they try
+     if ($("#catTickForm input:checkbox:checked").length == 0){
+       $('#catall').prop('checked', true);
      }
 
-     Cookies.set('catChoice', checkedBox);
-     console.log(checkedBox);
-     this.form.submit();
-   }
+     if (catTick.id == "catall"){
+       $('.cat').prop('checked', false);
+       return;
+     }
+     // returns (id,isChecked) of all checked user-submitted categoires
+     let catsTrue = ids.slice(1).filter( ([id,bool]) => { return bool === true })
+     if (catsTrue.length === 0){
+       $('#catall').prop('checked', true); //for some reason attr didn't work here
+     }
+     if (catsTrue.length > 0) {
+       $('#catall').attr("checked",false);
+     }
+
+     //set cookies to remember selected cats
+     if (notOnLoad){
+       let allCatTrues = ids.filter( ([id,bool]) => { return bool === true })
+       Cookies.set('catChoice', allCatTrues);
+     }
+    }
 
    $(document).ready(function() {
-
-
-
      // a button for testing things
     //  $("#btnSubmit").click(function(){
     //     $("div.time_selector select").val("week");
@@ -82,6 +93,7 @@
     //CHECK
     {% block scriptTasks %}
     {% endblock %}
+
 
     //when no categories exist, block user from adding tasks
     function taskAddable(){
@@ -109,11 +121,28 @@
 
      loadDrops();
 
+     //on page load, retrieve saved selected categories
+     function loadCats(){
+       catChoice = (Cookies.get('catChoice'));
+       if (catChoice){
+         catChoiceObj = JSON.parse(catChoice);
+         catChoiceObj.forEach((cat) => {
+           $('#' + cat[0].replace(" ", "\\ ")).prop('checked', true);
+          });
+        } else {
+          $('#catall').prop('checked', true);
+        }
+     }
+
+     loadCats();
+     checkCat($('#allcat'),false);
+
      // toggle buttons when an 'add' window open
      function allButtonsOff(bool){
        $('.cat_popup_open').prop('disabled', bool);
        $('.task_popup_open').prop('disabled', bool);
        $('.log_popup_open').prop('disabled',bool);
+       $('.event_popup_open').prop('disabled',bool);
      }
 
      // callback events on opening or closing popups
@@ -155,12 +184,22 @@
       pagecontainer: '#container2'
     });
 
+
+    $('#event_popup').popup({
+      type: 'tooltip',
+      offsetleft: 450,
+      backgroundactive: true,
+      pagecontainer: '#container2'
+    });
+
     openPopups('#cat_popup',true);
     closePopups('#cat_popup',false);
     openPopups('#task_popup',true);
     closePopups('#task_popup',false);
     openPopups('#log_popup',true);
     closePopups('#log_popup',false);
+    openPopups('#event_popup',true);
+    closePopups('#event_popup',false);
 
 
     $("#add").click(function(){
@@ -225,10 +264,10 @@
       <!-- select which categories to view -->
       {% block categories %}
       <div id = "categories">
-        <form>
-          <input type="checkbox" name="cat" onchange="checkCat(this)" value="allCats" checked> All Categories <br>
+        <form id = "catTickForm">
+          <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true)" value="allCats"> All Categories <br>
           {% for cat in allCats %}
-          <input type="checkbox" name="cat" onchange="checkCat(this)" value="{{cat['name']}}" > <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+          <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true)" value="{{cat['name']}}" > <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
           {% endfor %}
         </form>
         </div>
@@ -287,6 +326,22 @@
         <button class="log_popup_close">Close</button>
       </div>
       <br>
+
+      <!-- Add Event -->
+      <button class="event_popup_open">Add Event</button>
+      <div id="event_popup">
+        <form method=POST action="{{ url_for('addEvent') }}">
+          Event Name: <input type='text' name='eventName'><br>
+          Event Date (YYYY-MM-DD): <input type='text' name='eventDate'><br>
+          Start Time: <input type='text' name='startTime'><br>
+          End Time: <input type='text' name='endTime'><br>
+          <input type="submit" value="Submit">
+        </form>
+        <button class="event_popup_close">Close</button>
+      </div>
+      <br>
+
+
 
     </div>
 
