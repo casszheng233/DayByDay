@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block rightPanel %}
+
+
+<script>
+$(document).ready(function() {
+
+  //find today
+  var today = new Date(),
+      d = today.getDate(),
+      m = today.getMonth()+1,
+      y = today.getFullYear();
+  var date = y + "," + m + "," + d;
+
+  $('#dateinfo').append("Today is: " + y + "-" + m + "-" + d);
+  var table  = '<table class=eventTable id=eventTable><tr><th>Event Name</th><th>Event Start Time</th><th>Event End Time</th></tr></table>';
+  $('#container2').append(table);
+  //$('#container2').append('<table class=eventTable id=eventTable><tr><th>"Event Name"</th><th>"Event Start Time"</th><tr>"Event End Time"</tr></tr></table>');
+
+  //recieve the data structure containing task information from sql database
+  //maybe use ajax request instead?
+  var data = "{{ dataStruct }}";
+  var data = data.replace(/&#39;/g,"\"");
+  var dataStruct = JSON.parse(data);
+
+  console.log('base_event');
+  console.log(data);
+
+
+  function buildEvent(eventID, eventName, eventDate, startTime,endTime,selector, timeChoice){
+    if (timeChoice == 'day'){
+    var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
+    var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
+    var newRowContent = '<tr><th>'+eventName+'</th><th>'+startTime+'</th><th>'+endTime+'</th></tr>';
+    $(newRowContent).appendTo($("#eventTable"));}
+    if ((timeChoice == 'week') || (timeChoice=='month')){
+      console.log('inside of week');
+      $('#' + selector).append('<div class=event id=event' + eventID + ' style="border: 1px solid black;"> </div>');
+      var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
+      var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
+      //var line3 = "<input type=text  name='eventDetail' value='event"+ eventID +"'>" + eventName + "  <br>";
+	var line3 = "<input type=text  name='eventDetail' value='"+ eventName +"'> <br>";
+
+	$("#event" + eventID.toString()).append(line1 + line2 + line3 );
+    }
+  }
+
+{% endblock %}
+
+{% block customize %}
+
+//
+
+{% endblock %}

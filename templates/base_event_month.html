@@ -1,0 +1,114 @@
+<!-- <script>
+$(document).ready(function() { -->
+
+{% extends "base_event.html" %}
+
+{% block customize %}
+
+  var location = (window.location.href).split('/')[3];
+  //$("#catTickRedirect").val(location);
+
+  //create table to seperate days of week and contain tasks
+  $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekEvents" ></table>')
+  $("#weekEvents").append('<tr id = headers>   </tr>');
+
+  //put names of week into headers
+  var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  for (i = 0; i < 7; i++){
+    var header = '<th>' + weeknames[i] + '</th>';
+    $("#headers").append(header);
+  }``
+
+  //returns an array of date objects of the 1st of the month, the 8th of the month, etc
+  function defineMonth(){
+    var date = new Date();
+    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+    var weeks = [firstDay];
+    for (i = 1; i < 6; i++){
+      d = new Date(firstDay.getTime() + 7*86400000*i);
+      weeks.push(d);
+    }
+    return weeks;
+  }
+
+  //given a date, returns array of current week's dates in format YYYY,MM,DD
+  //beginning of week is Sunday, end is Saturday
+  function defineWeek(date){
+    var sunday = date;
+    sunday.setDate(sunday.getDate() - sunday.getDay());
+
+    dStr = sunday.toLocaleDateString().split('/');
+    week = [dStr[2] + ',' + dStr[0] + ',' + dStr[1]];
+
+    for (i = 1; i < 7; i++){
+      d = new Date(sunday.getTime() + 86400000*i); //robust against end-of-month changes
+      dStr = d.toLocaleDateString().split('/');
+      week.push(dStr[2] + ',' + dStr[0] + ',' + dStr[1] );
+    }
+    return week;
+  }
+
+  function formatWeekNames(date){
+    var week = defineWeek(date);
+    var displaynames = [];
+
+    for (i = 0; i < 7; i++){
+      var date = week[i].split(',');
+      displaynames.push(date[1] + "/" + date[2]);
+    }
+    return displaynames
+  }
+
+
+
+
+
+  function placeDayJ (j, dataStruct, date, selector){
+    eventDic = dataStruct[j]
+    console.log(eventDic["eventDate"].toString() == date)
+    console.log(eventDic)
+    if (eventDic["eventDate"].toString() == date){
+      console.log('yes')
+      buildEvent(eventDic["eventID"], eventDic["eventName"], eventDic["eventDate"], eventDic["startTime"], eventDic["endTime"],  selector, "week");
+    }
+  }
+
+
+
+  function oneWeek (date){
+    var displayNames = formatWeekNames(date);
+    var current = new Date();
+    var month = current.getMonth() + 1;
+    var testy = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
+    displayNames = testy;
+    //["11/26", "11/27", "11/28", "11/29", "11/30", "12/1", "12/2"]
+    $("#weekEvents").append('<tr> <td id = ' + displayNames[0].replace("/","_") + ' > ' + displayNames[0] + ' </td>' +
+                                '<td id = ' + displayNames[1].replace("/","_") + ' > ' + displayNames[1] + ' </td>' +
+                                '<td id = ' + displayNames[2].replace("/","_") + ' > ' + displayNames[2] + ' </td>' +
+                                '<td id = ' + displayNames[3].replace("/","_") + ' > ' + displayNames[3] + ' </td>' +
+                                '<td id = ' + displayNames[4].replace("/","_") + ' > ' + displayNames[4] + ' </td>' +
+                                '<td id = ' + displayNames[5].replace("/","_") + ' > ' + displayNames[5] + ' </td>' +
+                                '<td id = ' + displayNames[6].replace("/","_") + ' > ' + displayNames[6] + ' </td>' +  '</tr>');
+
+    var week = defineWeek(date);
+    for (j=0; j < dataStruct.length; j++ ){
+      for (w = 0; w < 7; w++){
+        placeDayJ(j, dataStruct, week[w], week[w].split(',')[1] + "_" + week[w].split(',')[2]);
+      }
+    }
+  }
+
+  var thing = defineMonth();
+  oneWeek(thing[0]);
+  oneWeek(thing[1]);
+  oneWeek(thing[2]);
+  oneWeek(thing[3]);
+  oneWeek(thing[4]);
+  oneWeek(thing[5]);
+
+});
+</script>
+
+{% endblock %}

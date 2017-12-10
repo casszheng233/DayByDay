@@ -170,7 +170,12 @@ def changeView():
         return redirect(url_for('week_checklist'))
     if (timeSelection == "month" and dataSelection == "checklist"):
         return redirect(url_for('month_checklist'))
-
+    if (timeSelection == "day" and dataSelection == "events"):
+        return redirect(url_for('day_event'))
+    if (timeSelection == "week" and dataSelection == "events"):
+        return redirect(url_for('week_event'))
+    if (timeSelection == "month" and dataSelection == "events"):
+        return redirect(url_for('month_event'))
     else:
         rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
         dropdowns = p3.buildDropdown(timeSelection,dataSelection)
@@ -234,6 +239,25 @@ def addEvent():
     if eventName.split()!=[] and legalDate(eventDate):
         p3.addEvent(userID,eventName,eventDate,start,end)
     return render_template('base.html', allCats =  allCats, database = DATABASE)
+
+@app.route('/day-event/', methods = ['GET','POST'])
+def day_event():
+    allCats = p3.getCats(1)
+    data = p3.rightPanelEvent("hardcoded")
+    return render_template('base_event_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+
+@app.route('/week-event/', methods = ['GET','POST'])
+def week_event():
+    allCats = p3.getCats(1)
+    data = p3.rightPanelEvent("user id currently hardcoded")
+    return render_template('base_event_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+
+
+@app.route('/month-event/', methods = ['GET','POST'])
+def month_event():
+    allCats = p3.getCats(1)
+    data = p3.rightPanelEvent("user id currently hardcoded")
+    return render_template('base_event_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
 
 
 

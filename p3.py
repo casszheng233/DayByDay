@@ -3,17 +3,17 @@ import MySQLdb
 import os
 from flask import (Flask, render_template, url_for, request, flash)
 
-# DSN  = { 'host': 'localhost',
-#                    'user' :  'czheng',
-#                    'passwd' :'MkC8oFMvMUTXc9O',
-#                    'db': 'czheng_db'}
-# DATABASE = 'czheng_db'
-
 DSN  = { 'host': 'localhost',
-                   'user' :  'rpyktel',
-                   'passwd' :'G2O2HUprzpi6xUl',
-                   'db': 'rpyktel_db'}
-DATABASE = 'rpyktel_db'
+                   'user' :  'czheng',
+                   'passwd' :'MkC8oFMvMUTXc9O',
+                   'db': 'czheng_db'}
+DATABASE = 'czheng_db'
+
+# DSN  = { 'host': 'localhost',
+#                    'user' :  'rpyktel',
+#                    'passwd' :'G2O2HUprzpi6xUl',
+#                    'db': 'rpyktel_db'}
+# DATABASE = 'rpyktel_db'
 
 def cursor(database=DATABASE):
     DSN['db'] = database
@@ -76,7 +76,7 @@ def rightPanelTask(userID):
                           'end': subTask[0]['end'],
                           'catColor': getColors[str(parent[0]['name'])],
                           'cat': str(parent[0]['name'])}
-                          
+
 
             subDics.append(subDic)
         taskHolder = [parentDic,subDics]
@@ -243,3 +243,31 @@ def addEvent(userID,eventName,eventDate,start,end):
     #         flash ("task existed in the database")
     # except:
     #     flash("check your input!")
+
+
+def rightPanelEvent(userID):
+    userID = 1 # hardcoded right now
+    curs = cursor(DATABASE)
+    curs.execute('select * from event where userId = %s;',(userID,))
+    buildAssociation = curs.fetchall()
+    finalData = []
+    eventDic = {}
+    for object in buildAssociation:
+        eventID = str(object['eventID'])
+        eventName = str(object['name'])
+        eventDate = object['eventDate']
+        startTime = str(object['start'])
+        endTime = str(object['end'])
+
+        eventDic = {'eventName': eventName,
+                    'eventID':eventID,
+                    'eventDate': eventDate,
+                    'startTime': startTime,
+                    'endTime': endTime}
+        finalData.append(eventDic)
+
+    clean1 = str(finalData).replace('datetime.date(','[')
+    clean2 = str(clean1).replace(')',']')
+    clean3 = str(clean2).replace('None','0')
+    clean4 = str(clean3).replace('datetime.timedelta(','[')
+    return clean4

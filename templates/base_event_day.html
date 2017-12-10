@@ -1,0 +1,35 @@
+<!-- <script>
+$(document).ready(function() { -->
+
+{% extends "base_event.html" %}
+
+{% block customize %}
+
+  //general improvement: instead of pulling all tasks with dataStruct json, change so that SQL only returns
+  //tasks with current date.
+
+  //Scott: Regarding style, should this helper function be placed within placeSubtasks?
+  //only build the task if its due date is the same as the current date
+
+
+
+  //process data structure of all tasks to find which dates to display
+  function placeEvent(dataStruct){
+    //Extract parent task from data structure for processing
+    for (j=0; j < dataStruct.length; j++ ){
+      eventDic = dataStruct[j]
+      if (eventDic["eventDate"].toString() == date){
+        s=''+date[0]+'/'+date[1]+'/'+date[2]
+        buildEvent(eventDic["eventID"], eventDic["eventName"], s,eventDic["startTime"], eventDic["endTime"], "container2", "day");
+      }
+
+    }
+  }
+
+  placeEvent(dataStruct);
+
+
+});
+</script>
+
+{% endblock %}
