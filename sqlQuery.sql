@@ -26,9 +26,10 @@ Create table event(
 	eventID int auto_increment,
 	userID int,
 	INDEX (eventID),
-	start date,
-	end date,
-	name varchar(50),
+	eventDate date not null,
+	start time not null,
+	end time not null,
+	name varchar(50) not null,
 	primary key(eventID),
 	foreign key(userID) references user(userID)
 ) ENGINE = InnoDB;

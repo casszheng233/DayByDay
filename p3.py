@@ -41,6 +41,7 @@ def rightPanelTask(userID):
     taskDic = {}
     for object in buildAssociation:
         parentTask = str(object['parentTaskID'])
+        print parentTask
         subTask = str(object['subTaskID'])
         if (parentTask in taskDic):
             taskDic[parentTask].append(subTask)
@@ -66,12 +67,16 @@ def rightPanelTask(userID):
             curs2.execute('select taskName, isFinished, taskID, end, name from task where taskID = %s;',(subID,))
             subTask = curs2.fetchall()
 
-            subDic = {'name': str(subTask[0]['taskName']),
-                      'isFinished': subTask[0]['isFinished'],
-                      'taskID': str(subTask[0]['taskID']),
-                      'end': subTask[0]['end'],
-                      'catColor': getColors[str(parent[0]['name'])],
-                      'cat': str(parent[0]['name'])}
+            if (curs2.rowcount == 0):
+                subDic = {}
+            else:
+                subDic = {'name': str(subTask[0]['taskName']),
+                          'isFinished': subTask[0]['isFinished'],
+                          'taskID': str(subTask[0]['taskID']),
+                          'end': subTask[0]['end'],
+                          'catColor': getColors[str(parent[0]['name'])],
+                          'cat': str(parent[0]['name'])}
+                          
 
             subDics.append(subDic)
         taskHolder = [parentDic,subDics]
@@ -176,6 +181,10 @@ def tickBox(taskID):
 def addSubtask(userID,parent,child):#this needs to be an id
     curs = cursor(DATABASE)
     curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,%s);',(userID,parent,child,))
+
+def addSubtaskNull(userID,parent):#this needs to be an id
+    curs = cursor(DATABASE)
+    curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,NULL);',(userID,parent,))
 
 def addLog(cat,hours,userID,taskDate):
     curs = cursor(DATABASE)

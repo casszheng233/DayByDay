@@ -49,6 +49,7 @@
      Cookies.set('dataChoice', choice);
    }
 
+
    //if any cats checked, uncheck allCats
    //if no cats checked, check allCats
    //if allCats checked, uncheck others
@@ -58,6 +59,7 @@
      $inputs.each(function (index){
          ids.push( [$(this).attr('id') , $('#' + $(this).attr('id').replace(" ", "\\ ")).prop('checked')])
      });
+     // ids = ids.pop();
 
      //don't allow user to select 0 categories, turn on 'all categories' if they try
      if ($("#catTickForm input:checkbox:checked").length == 0){
@@ -66,10 +68,12 @@
 
      if (catTick.id == "catall"){
        $('.cat').prop('checked', false);
+       setCatTickCookies();
        return;
      }
      // returns (id,isChecked) of all checked user-submitted categoires
      let catsTrue = ids.slice(1).filter( ([id,bool]) => { return bool === true })
+
      if (catsTrue.length === 0){
        $('#catall').prop('checked', true); //for some reason attr didn't work here
      }
@@ -77,12 +81,28 @@
        $('#catall').attr("checked",false);
      }
 
+     // let allCatTrues = ids.filter(([id,bool]) => { return bool === true })
+     // $('#catTickId').val(JSON.stringify(allCatTrues));
+
      //set cookies to remember selected cats
      if (notOnLoad){
-       let allCatTrues = ids.filter( ([id,bool]) => { return bool === true })
-       Cookies.set('catChoice', allCatTrues);
+       setCatTickCookies();
      }
     }
+
+    function setCatTickCookies(){
+      var $inputs = $('#catTickForm :input');
+      var ids = [];
+      $inputs.each(function (index){
+          ids.push( [$(this).attr('id') , $('#' + $(this).attr('id').replace(" ", "\\ ")).prop('checked')])
+      });
+      ids.pop();
+      ids.pop();
+      Cookies.set('catChoice', ids);
+      $('#catTickId').val(JSON.stringify(ids));
+      console.log(Cookies.get('catChoice'));
+    }
+
 
    $(document).ready(function() {
      // a button for testing things
@@ -125,10 +145,16 @@
      function loadCats(){
        catChoice = (Cookies.get('catChoice'));
        if (catChoice){
+
          catChoiceObj = JSON.parse(catChoice);
+         $('#catTickId').val(JSON.stringify(catChoiceObj));
+         // $('#catTickId').val(JSON.stringify(catChoiceObj));
+
          catChoiceObj.forEach((cat) => {
-           $('#' + cat[0].replace(" ", "\\ ")).prop('checked', true);
-          });
+           if (cat[1] == true){
+             $('#' + cat[0].replace(" ", "\\ ")).prop('checked', true);
+           }});
+
         } else {
           $('#catall').prop('checked', true);
         }
@@ -136,6 +162,7 @@
 
      loadCats();
      checkCat($('#allcat'),false);
+
 
      // toggle buttons when an 'add' window open
      function allButtonsOff(bool){
@@ -264,11 +291,13 @@
       <!-- select which categories to view -->
       {% block categories %}
       <div id = "categories">
-        <form id = "catTickForm">
-          <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true)" value="allCats"> All Categories <br>
+        <form id = "catTickForm" method=POST action="{{ url_for('tickedCats') }}">
+          <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); this.form.submit();" value="allCats"> All Categories <br>
           {% for cat in allCats %}
-          <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true)" value="{{cat['name']}}" > <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
+          <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true); this.form.submit();" value="{{cat['name']}}" > <font color=" {{cat['color']}}  "> {{cat['name']}}  </font>    <br>
           {% endfor %}
+          <input type = "hidden" name = "catHidden" id = "catTickId" value = "0">
+          <input type = "hidden" name = "catHiddenRedirect" id = "catTickRedirect" value = "0">
         </form>
         </div>
       {% endblock %}

@@ -4,6 +4,23 @@
 <script>
 $(document).ready(function() {
 
+  catChoice = (Cookies.get('catChoice'));
+  var catChoiceObj = "";
+  if (catChoice){
+    catChoiceObj = JSON.parse(catChoice);
+  }
+  catChoiceDic = {};
+  for (i = 0; i < catChoiceObj.length; i ++){
+    catChoiceDic[catChoiceObj[i][0].toString()] = catChoiceObj[i][1];
+  }
+  console.log(catChoiceDic);
+
+
+
+
+
+  // ["catall", false]["catcs304", false] ["catmath", true]
+
   //find today
   var today = new Date(),
       d = today.getDate(),
@@ -24,6 +41,13 @@ $(document).ready(function() {
   //has an extra 'selector' field
   // currently due
   function buildTask(taskID, catColor, category, name, isFin, isParent, selector, timeChoice){
+    if (!catChoiceDic["catall"]){
+      if (!catChoiceDic["cat" + category]){
+       console.log(category + "not selected");
+       return;
+      }
+    }
+
 
     //determines whether checkbox should be rendered pre-checked
     finBool = "";

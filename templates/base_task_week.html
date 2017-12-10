@@ -4,6 +4,8 @@ $(document).ready(function() { -->
 {% extends "base_task.html" %}
 
 {% block customize %}
+  var location = (window.location.href).split('/')[3];
+  $("#catTickRedirect").val(location);
 
   //the week we define goes from last Sunday to Saturday
   //todo: daylights saving safe version
@@ -67,22 +69,17 @@ $(document).ready(function() { -->
     //makes sure task's due date is the same as the relevant date
     function placer(taskDic, isParent, selector){
       if (taskDic["end"].toString() == date){
-        // console.log("checkpoint 1: " + taskDic["catColor"])
-        // console.log("checkpoint 1.5" + taskDic)
         buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "week");
-        // console.log(taskDic["taskID"])
       }
     }
     //executes placing for both parent tasks and subtasks
     taskDic = dataStruct[j][0];
-    // console.log("first");
-    // console.log(taskDic);
     placer(taskDic, true, selector);
     for (i=0; i < dataStruct[j][1].length; i++){
         taskDic = dataStruct[j][1][i];
-        // console.log("second");
-        // console.log(taskDic);
-        placer(taskDic,false, selector);
+        if (Object.keys(taskDic).length != 0){
+          placer(taskDic,false, selector);
+        }
       }
   }
 

@@ -72,6 +72,9 @@ def addTask():
             if checkID!=None:
                 parID = checkID['taskID']
                 numSubtask = int(request.form['num']) #check number of subtasks
+                if (numSubtask == 0):
+                    p3.addSubtaskNull(userID,parID)
+
                 for i in range(1,numSubtask+1):
                         sub = request.form['subtask'+str(i)]
                         if sub.split()!=[]:
@@ -84,8 +87,8 @@ def addTask():
                             endFormatted = startDT + dt.timedelta(days = daysFromStart)
                             endFormat = str(endFormatted)[:-9]
 
-                            print 'subTask'+str(i)
-                            print " "
+                            # print 'subTask'+str(i)
+                            # print " "
                             p3.addTask(isFinished,userID,sub,start,endFormat,cat)
                             childID = p3.checkTaskID(sub,start,endFormat)['taskID']
                             p3.addSubtask(userID,parID,childID)
@@ -117,9 +120,20 @@ def tickTask():
         value = request.form['taskCheck']
         redirectVal = request.form['timeSelector']
         p3.tickBox(value)
-
-        print value
+        # print value
     return redirect(url_for(redirectVal))
+
+@app.route('/tickedCats/', methods = ['GET', 'POST'])
+def tickedCats():
+    redirDic = {"day-checklist":"day_checklist","week-checklist":"week_checklist","month-checklist":"month_checklist"}
+    if request.method == 'POST':
+        value = request.form['catHidden']
+        redir = request.form['catHiddenRedirect']
+
+        print redir
+
+    return redirect(url_for(redirDic[redir])) #todo: go to wherever they were
+
 
 @app.route('/addLog/',methods = ['POST'])
 def addLog():

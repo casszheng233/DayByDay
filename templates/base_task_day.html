@@ -4,7 +4,8 @@ $(document).ready(function() { -->
 {% extends "base_task.html" %}
 
 {% block customize %}
-
+  var location = (window.location.href).split('/')[3];
+  $("#catTickRedirect").val(location);
   //general improvement: instead of pulling all tasks with dataStruct json, change so that SQL only returns
   //tasks with current date.
 
@@ -27,7 +28,9 @@ $(document).ready(function() { -->
       //Extract child subTasks from data structure for processing
       for (i=0; i < dataStruct[j][1].length; i++){
           taskDic = dataStruct[j][1][i];
+          if (Object.keys(taskDic).length != 0){
           placeSubtasksHelper(taskDic, false);
+        }
       }
     }
   }
