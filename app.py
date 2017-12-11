@@ -130,7 +130,7 @@ def tickedCats():
         value = request.form['catHidden']
         redir = request.form['catHiddenRedirect']
 
-        print redir
+        # print redir
 
     return redirect(url_for(redirDic[redir])) #todo: go to wherever they were
 

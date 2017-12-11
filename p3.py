@@ -3,17 +3,17 @@ import MySQLdb
 import os
 from flask import (Flask, render_template, url_for, request, flash)
 
-DSN  = { 'host': 'localhost',
-                   'user' :  'czheng',
-                   'passwd' :'MkC8oFMvMUTXc9O',
-                   'db': 'czheng_db'}
-DATABASE = 'czheng_db'
-
 # DSN  = { 'host': 'localhost',
-#                    'user' :  'rpyktel',
-#                    'passwd' :'G2O2HUprzpi6xUl',
-#                    'db': 'rpyktel_db'}
-# DATABASE = 'rpyktel_db'
+#                    'user' :  'czheng',
+#                    'passwd' :'MkC8oFMvMUTXc9O',
+#                    'db': 'czheng_db'}
+# DATABASE = 'czheng_db'
+
+DSN  = { 'host': 'localhost',
+                   'user' :  'rpyktel',
+                   'passwd' :'G2O2HUprzpi6xUl',
+                   'db': 'rpyktel_db'}
+DATABASE = 'rpyktel_db'
 
 def cursor(database=DATABASE):
     DSN['db'] = database
@@ -41,7 +41,7 @@ def rightPanelTask(userID):
     taskDic = {}
     for object in buildAssociation:
         parentTask = str(object['parentTaskID'])
-        print parentTask
+        # print parentTask
         subTask = str(object['subTaskID'])
         if (parentTask in taskDic):
             taskDic[parentTask].append(subTask)
@@ -131,12 +131,12 @@ def deleteSubtask(taskID):
     curs = cursor(DATABASE)
     curs.execute('select * from taskList where parentTaskID = %s;',(taskID,))
     rows = curs.fetchall()
-    print rows
-    print len(rows)
+    # print rows
+    # print len(rows)
     if len(rows)!=0:
         for row in rows:
             subTaskID = row['subTaskID']
-            print subTaskID
+            # print subTaskID
             deleteSubtask(subTaskID)
             curs.execute('delete from taskList where parentTaskID = %s and subTaskID = %s;',(taskID,subTaskID,))
         curs.execute('delete from task where taskID = %s;',(taskID,))

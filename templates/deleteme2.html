@@ -6,10 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
     <title>DayByDay</title>
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous"> -->
-
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.js') }}"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="//cdn.rawgit.com/noelboss/featherlight/1.7.9/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.13/jquery.popupoverlay.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
@@ -22,14 +19,6 @@
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-
-    <!-- <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.js') }}"></script> -->
-    <script type="text/javascript" src="{{ url_for('static', filename='moment/moment.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/transition.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/collapse.js') }}"></script>
-    <!-- <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/dist/bootstrap.min.js') }}"></script> -->
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/bootstrap-datetimepicker.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-datetimepicker.min.css') }}" />
 
     <style>
 
@@ -433,8 +422,7 @@
 
     <div class="bs-example">
     <div class="panel-group" id="accordion">
-
-        <form class="panel panel-default" method=POST action="{{ url_for('addCat') }}">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" >+ Category</a>
@@ -442,12 +430,16 @@
             </div>
             <div id="collapseOne" class="panel-collapse collapse">
                 <div class="panel-body">
-                  <input type='text' class="form-control" name='catName' placeholder="Category Name"><br>
-                  <input type='text' class="form-control" name='catColor' placeholder="Category Color"><br>
-                  <input class="btn btn-default" type="submit" value="Submit">
+                    <p>hello</p>
+                    <div id="cat_popup">
+                      hello2
+                    </div>
+
+
+
                 </div>
             </div>
-        </form>
+        </div>
 
         <form class="panel panel-default" method=POST action="{{ url_for('addTask') }}">
             <div class="panel-heading">
@@ -457,74 +449,12 @@
             </div>
             <div id="collapseTwo" class="panel-collapse collapse">
                 <div class="panel-body">
-
-
-
-
-               <select class = "form-control" name="catOpt" id = "catOpt">
-                 <option value="none">Choose Category</option>
-                 {% block add_dropdown %}
-                 {% for cat in allCats %}
-                 <option value="{{cat['name']}}"> {{cat['name']}} </option>
-                 {% endfor %}{% endblock %}
-               </select>
-               <br>
-
-
-
-                  <input type='text' class="form-control"  name='catName' placeholder="Task Name"><br>
-
-
-
-            <div class='input-group date' id='datetimepicker6'>
-                <input type='text' name='startDate' class="form-control" placeholder="Start Date"/>
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-            </div>
-
-            <br>
-
-            <div class='input-group date' id='datetimepicker7'>
-                <input type='text' name='endDate' class="form-control" placeholder="End Date"/>
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-            </div>
-            <br>
-
-
-<!-- move me -->
-<script type="text/javascript">
-    $(function () {
-        $('#datetimepicker6').datetimepicker({format: 'YYYY-MM-DD'});
-        $('#datetimepicker7').datetimepicker({
-            format: 'YYYY-MM-DD',
-            useCurrent: false //Important! See issue #1075
-        });
-        $("#datetimepicker6").on("dp.change", function (e) {
-            $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
-        });
-        $("#datetimepicker7").on("dp.change", function (e) {
-            $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
-        });
-    });
-</script>
-
-
-
-                  <div id = "subtasks">
-                  </div>
-                  <input class="btn btn-default" type="button" value="Add subtask" id = "add"><br>
-                  <input type = "hidden" name = "num" id = "num" value = "0">
-                  <br><input class="btn btn-default" type="submit" value="Submit">
-
+                    <p>Bootstrap is a powerful front-end framework for faster and easier web development. It is a collection of CSS and HTML conventions. <a href="https://www.tutorialrepublic.com/twitter-bootstrap-tutorial/" target="_blank">Learn more.</a></p>
                 </div>
             </div>
         </form>
 
-
-        <form class="panel panel-default" method=POST action="{{ url_for('addLog') }}">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">+ Log Entry</a>
@@ -532,30 +462,9 @@
             </div>
             <div id="collapseThree" class="panel-collapse collapse">
                 <div class="panel-body">
-
-                  <input type='text' class="form-control" name='catName' placeholder="Category Name"><br>
-                  <input type='text' class="form-control" name='hour' placeholder = "Hours"><br>
-                  <!-- <input type='text' class="form-control" name='taskDate' placeholder = "Task Date"><br> -->
-
-
-                  <div class='input-group date' id='datetimepicker1'>
-                      <input type='text' class="form-control" name='taskDate' placeholder = "Task Date"/>
-                      <span class="input-group-addon">
-                          <span class="glyphicon glyphicon-calendar"></span>
-                      </span>
-                  </div>
-                  <br>
-
-                  <script type="text/javascript">
-                      $(function () {
-                          $('#datetimepicker1').datetimepicker({format: 'YYYY-MM-DD'});
-                      });
-                  </script>
-
-                  <input class="btn btn-default" type="submit" value="Submit">
-
+                    <p>CSS stands for Cascading Style Sheet. CSS allows you to specify various style properties for a given HTML element such as colors, backgrounds, fonts etc. <a href="https://www.tutorialrepublic.com/css-tutorial/" target="_blank">Learn more.</a></p>
                 </div>
-            </form>
+            </div>
         </div>
 
         <div class="panel panel-default">
@@ -566,7 +475,7 @@
             </div>
             <div id="collapseFour" class="panel-collapse collapse">
                 <div class="panel-body">
-                  NOT IMPLEMENTED YET
+                    <p>CSS stands for Cascading Style Sheet. CSS allows you to specify various style properties for a given HTML element such as colors, backgrounds, fonts etc. <a href="https://www.tutorialrepublic.com/css-tutorial/" target="_blank">Learn more.</a></p>
                 </div>
             </div>
         </div>
@@ -579,7 +488,7 @@
   </div>
 
       <!-- Add Category -->
-      <!-- <button class="cat_popup_open">Add Category</button>
+      <button class="cat_popup_open">Add Category</button>
       <div id="cat_popup">
         <form method=POST action="{{ url_for('addCat') }}">
           Category Name: <input type='text' name='catName'><br>
@@ -588,13 +497,39 @@
         </form>
         <button class="cat_popup_close">Close</button>
       </div>
-      <br> -->
+      <br>
 
+      <!-- Add Task -->
+      <button class="task_popup_open">Add Task</button>
+      <div id="task_popup">
+        <form method=POST action="{{ url_for('addTask') }}">
+          Task Category:
+          <select name="catOpt" id = "catOpt">
+	     <option value="none">Not Specified</option>
+       {% block add_dropdown %}
+       {% for cat in allCats %}
+       <option value="{{cat['name']}}"> {{cat['name']}} </option>
+       {% endfor %}{% endblock %}
+          </select>
+          <br>
 
+          Task Name: <input type='text' name='catName'><br>
+          Start Date (YYYY-MM-DD): <input type='text' name='startDate'><br>
+          End Date (YYYY-MM-DD): <input type='text' name='endDate'><br>
+
+          <div id = "subtasks">
+          </div>
+          <input type="button" value="Add subtask" id = "add">
+          <input type = "hidden" name = "num" id = "num" value = "0">
+          <input type="submit" value="Submit">
+        </form>
+        <button class="task_popup_close">Close</button>
+      </div>
+      <br>
 
 
       <!-- Add Log -->
-      <!-- <button class="log_popup_open">Add/Update Log</button>
+      <button class="log_popup_open">Add/Update Log</button>
       <div id="log_popup">
         <form method=POST action="{{ url_for('addLog') }}">
           Category Name: <input type='text' name='catName'><br>
@@ -604,7 +539,7 @@
         </form>
         <button class="log_popup_close">Close</button>
       </div>
-      <br> -->
+      <br>
 
       <!-- Add Event -->
       <!-- <button class="event_popup_open">Add Event</button>
@@ -639,12 +574,6 @@
      </div>
   </div>
 
-
-
-
-
-
-
   <!-- <input id = "btnSubmit" type="submit" value="Test"/> -->
 </div>
 
@@ -665,3 +594,46 @@
 
 </body>
 </html>
+
+
+
+<div class="container">
+    <div class="row">
+        <div class='col-sm-6'>
+            <div class="form-group">
+                <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker();
+            });
+        </script>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class='col-sm-6'>
+        <div class="form-group">
+            <div class='input-group date' id='datetimepicker4'>
+                <input type='text' class="form-control" />
+                <span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+           // Bootstrap DateTimePicker v4
+           $('#datetimepicker').datetimepicker({
+                 format: 'DD/MM/YYYY'
+           });
+        });
+    </script>
+</div>

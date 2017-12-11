@@ -13,7 +13,7 @@ $(document).ready(function() {
   for (i = 0; i < catChoiceObj.length; i ++){
     catChoiceDic[catChoiceObj[i][0].toString()] = catChoiceObj[i][1];
   }
-  console.log(catChoiceDic);
+  // console.log(catChoiceDic);
 
 
 
@@ -35,15 +35,32 @@ $(document).ready(function() {
   var data = data.replace(/&#39;/g,"\"");
   var dataStruct = JSON.parse(data);
 
-  console.log(data);
+  // console.log(data);
+
+  //todo: toggling on completely done tasks
+  for (i = 0; i < dataStruct.length; i++){
+    // console.log(" ");
+    // console.log(dataStruct[i][0]['name']);
+      //console.log(dataStruct[i][1]);
+
+      var subtasks = dataStruct[i][1];
+      // console.log(subtasks);
+
+      if (Object.keys(subtasks[0]).length != 0){
+      let allDone = subtasks.reduce((result,taskDic) =>
+          {return (taskDic['isFinished'] && (result))  }, true);
+      // console.log("foldr: " + allDone);
+    }
+  }
 
 
   //has an extra 'selector' field
   // currently due
   function buildTask(taskID, catColor, category, name, isFin, isParent, selector, timeChoice){
+
     if (!catChoiceDic["catall"]){
       if (!catChoiceDic["cat" + category]){
-       console.log(category + "not selected");
+       // console.log(category + " not selected");
        return;
       }
     }
