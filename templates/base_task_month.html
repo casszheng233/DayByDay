@@ -1,3 +1,9 @@
+<!--
+     Because this inherits from base_task.html /in the middle/ of a <script> tag and document ready function,
+     the following two lines are commented out. I keep them here for easy uncommenting for my text editor
+     to properly color my code. Please let us know if this is bad form, and what alternatives there are if
+     it is.
+-->
 <!-- <script>
 $(document).ready(function() { -->
 
@@ -5,21 +11,23 @@ $(document).ready(function() { -->
 
 {% block customize %}
 
+  // for when page reloads upon form submission-- set current page information to return to this page
   var location = (window.location.href).split('/')[3];
   $("#catTickRedirect").val(location);
 
-  //create table to seperate days of week and contain tasks
+  //create table to seperate days of week into columns, and contain tasks
   $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekTasks" ></table>')
-  $("#weekTasks").append('<tr id = headers>   </tr>');
 
-  //put names of week into headers
+  //put names of weekdays into header row
+  $("#weekTasks").append('<tr id = headers>   </tr>');
   var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   for (i = 0; i < 7; i++){
-    var header = '<th>' + weeknames[i] + '</th>';
+    var header = '<th class = "text-center">' + weeknames[i] + '</th>';
     $("#headers").append(header);
   }``
 
-  //returns an array of date objects of the 1st of the month, the 8th of the month, etc
+  // returns an array of date objects of the 1st of the month, the 8th of the month, etc adding 7 days
+  // each time until reaching end of month
   function defineMonth(){
     var date = new Date();
     var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -27,14 +35,14 @@ $(document).ready(function() { -->
 
     var weeks = [firstDay];
     for (i = 1; i < 6; i++){
-      d = new Date(firstDay.getTime() + 7*86400000*i);
+      d = new Date(firstDay.getTime() + 7*86400000*i); //robust against end-of-month changes. TODO: daylights savings
       weeks.push(d);
     }
     return weeks;
   }
 
-  //given a date, returns array of current week's dates in format YYYY,MM,DD
-  //beginning of week is Sunday, end is Saturday
+  //given a date, returns array of current week's dates in format YYYY,MM,DD for comparison to SQL values
+  //Defines a week as last Sunday to Saturday.
   function defineWeek(date){
     var sunday = date;
     sunday.setDate(sunday.getDate() - sunday.getDay());
@@ -50,6 +58,7 @@ $(document).ready(function() { -->
     return week;
   }
 
+  //formats week names for display in header
   function formatWeekNames(date){
     var week = defineWeek(date);
     var displaynames = [];
@@ -61,14 +70,17 @@ $(document).ready(function() { -->
     return displaynames
   }
 
-
+  //for one task from the data structure, if the date on task matches a date to be displayed,
+  //create the task in the corresponding slot of the week table
   function placeSubtasksHelper (j, dataStruct, date, selector){
-    //makes sure task's due date is the same as the relevant date
+
+    //makes sure task's due date is the same as the relevant date, and builds task
     function placer(taskDic, isParent, selector){
       if (taskDic["end"].toString() == date){
         buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "month");
       }
     }
+
     //executes placing for both parent tasks and subtasks
     taskDic = dataStruct[j][0];
     placer(taskDic, true, selector);
@@ -77,24 +89,23 @@ $(document).ready(function() { -->
         if (Object.keys(taskDic).length != 0){
           placer(taskDic,false, selector);
         }
-      }
+    }
   }
 
-
+  // creates one week as a row of our table
   function oneWeek (date){
     var displayNames = formatWeekNames(date);
     var current = new Date();
     var month = current.getMonth() + 1;
-    var testy = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
-    displayNames = testy;
-    //["11/26", "11/27", "11/28", "11/29", "11/30", "12/1", "12/2"]
-    $("#weekTasks").append('<tr> <td id = ' + displayNames[0].replace("/","_") + ' > ' + displayNames[0] + ' </td>' +
-                                '<td id = ' + displayNames[1].replace("/","_") + ' > ' + displayNames[1] + ' </td>' +
-                                '<td id = ' + displayNames[2].replace("/","_") + ' > ' + displayNames[2] + ' </td>' +
-                                '<td id = ' + displayNames[3].replace("/","_") + ' > ' + displayNames[3] + ' </td>' +
-                                '<td id = ' + displayNames[4].replace("/","_") + ' > ' + displayNames[4] + ' </td>' +
-                                '<td id = ' + displayNames[5].replace("/","_") + ' > ' + displayNames[5] + ' </td>' +
-                                '<td id = ' + displayNames[6].replace("/","_") + ' > ' + displayNames[6] + ' </td>' +  '</tr>');
+    var onlyCurrentMonth = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
+    displayNames = onlyCurrentMonth;
+    $("#weekTasks").append('<tr> <td class="text-center" id = ' + displayNames[0].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[0] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[1].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[1] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[2].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[2] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[3].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[3] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[4].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[4] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[5].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[5] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[6].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[6] + ' </td>' +  '</tr>');
 
     var week = defineWeek(date);
     for (j=0; j < dataStruct.length; j++ ){
@@ -104,13 +115,14 @@ $(document).ready(function() { -->
     }
   }
 
-  var thing = defineMonth();
-  oneWeek(thing[0]);
-  oneWeek(thing[1]);
-  oneWeek(thing[2]);
-  oneWeek(thing[3]);
-  oneWeek(thing[4]);
-  oneWeek(thing[5]);
+  // create the weeks of the month
+  var aWeek = defineMonth();
+  oneWeek(aWeek[0]);
+  oneWeek(aWeek[1]);
+  oneWeek(aWeek[2]);
+  oneWeek(aWeek[3]);
+  oneWeek(aWeek[4]);
+  oneWeek(aWeek[5]);
 
 });
 </script>

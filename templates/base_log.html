@@ -5,9 +5,56 @@
 
 
 {% block rightPanel %}
-
+	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
+	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 	<script type="text/javascript">
-	function loadLog(allLog,viewFormat,gap,intType){
+//get the user's choices from cookies and convert from string to data structure
+
+
+	catChoice = (Cookies.get('catChoice'));
+	var catChoiceObj = "";
+	if (catChoice){
+		catChoiceObj = JSON.parse(catChoice);
+	}
+	catChoiceDic = {};
+	for (i = 0; i < catChoiceObj.length; i ++){
+		catChoiceDic[catChoiceObj[i][0].toString()] = catChoiceObj[i][1];
+	}
+
+	var catList = [];
+	for (k in catChoiceDic){
+		if (catChoiceDic[k]==true){
+			catList.push(k);
+		}
+	}
+
+
+	function translatePoints(raw){
+		var result = [];
+		for (i = 0; i < raw.length; i++){
+			rec = raw[i];
+			result.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+		}
+		return result;
+	}
+
+	function makeData(dataList,catName,dataPoints,color){
+		var eachData = {
+					type: "line",
+					showInLegend: true,
+					lineThickness: 2,
+					name: catName,
+					markerType: "square",
+					color: '#'+color,//"#F08080",
+					dataPoints : dataPoints
+				};
+		console.log('color');
+		console.log(color);
+		dataList.push(eachData);
+
+	}
+
+	function loadLog(data,viewFormat,gap,intType){
 		window.onload = function () {
 			var chart = new CanvasJS.Chart("chartContainer", {
 				title: {
@@ -34,17 +81,18 @@
 					verticalAlign: "center",
 					horizontalAlign: "right"
 				},
-				data: [//can also take a parameter to track different tasks
-				{
-					type: "line",
-					showInLegend: true,
-					lineThickness: 2,
-					name: "Accumulative Hours Spent",
-					markerType: "square",
-					color: "#F08080",
-					dataPoints : allLog
-				}
-				],
+				data:data,
+				// data: [//can also take a parameter to track different tasks
+				// {
+				// 	type: "line",
+				// 	showInLegend: true,
+				// 	lineThickness: 2,
+				// 	name: "Accumulative Hours Spent",
+				// 	markerType: "square",
+				// 	color: "#F08080",
+				// 	dataPoints : allLog
+				// }
+				// ],
 				legend: {
 					cursor: "pointer",
 					itemclick: function (e) {
@@ -61,18 +109,38 @@
 
 			chart.render();
 		}}
-		allLogRec = {{logs}};
+		//allLogRec = {{logs}};//our dictionary
+		var data = "{{logs}}";
+		var data = data.replace(/&#39;/g,"\"");
+		var allLogRec = JSON.parse(data);
+
+		var color = "{{colorDict}}"
+		console.log(color);
+		var color = color.replace(/&#39;/g,"\"");
+		var colorDic = JSON.parse(color);
+		console.log('colorDic')
+		console.log(colorDic);
 		dataRec = [];
 		intervalGap = {{intervalGap}};
 		intType = "{{intType}}";
 		dateFormat = "{{dFormat}}";
-		for (i = 0; i < allLogRec.length; i++){
-			rec = allLogRec[i];
-			dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+
+
+		for (var j = 0 ; j <catList.length; j++){
+
+			var actualCat = catList[j].substring(3);
+      if (actualCat in allLogRec){
+			var dataPoints = translatePoints(allLogRec[actualCat]);
+			console.log(colorDic[actualCat]);
+			makeData(dataRec,actualCat,dataPoints,colorDic[actualCat]);}
+
 		}
+		// for (i = 0; i < allLogRec.length; i++){
+		// 	rec = allLogRec[i];
+		// 	dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+		// }
 		loadLog(dataRec,dateFormat,intervalGap,intType);
-	</script>
-	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
-	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+
 
 {% endblock %}

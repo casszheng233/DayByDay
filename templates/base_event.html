@@ -4,6 +4,7 @@
 
 
 <script>
+
 $(document).ready(function() {
 
   //find today
@@ -14,8 +15,8 @@ $(document).ready(function() {
   var date = y + "," + m + "," + d;
 
   $('#dateinfo').append("Today is: " + y + "-" + m + "-" + d);
-  var table  = '<table class=eventTable id=eventTable><tr><th>Event Name</th><th>Event Start Time</th><th>Event End Time</th></tr></table>';
-  $('#container2').append(table);
+  // var table  = '<table class=eventTable id=eventTable><tr><th>Event Name</th><th>Event Start Time</th><th>Event End Time</th></tr></table>';
+  // $('#container2').append(table);
   //$('#container2').append('<table class=eventTable id=eventTable><tr><th>"Event Name"</th><th>"Event Start Time"</th><tr>"Event End Time"</tr></tr></table>');
 
   //recieve the data structure containing task information from sql database
@@ -24,26 +25,41 @@ $(document).ready(function() {
   var data = data.replace(/&#39;/g,"\"");
   var dataStruct = JSON.parse(data);
 
-  console.log('base_event');
-  console.log(data);
+  // console.log('base_event');
+  // console.log(data);
 
 
   function buildEvent(eventID, eventName, eventDate, startTime,endTime,selector, timeChoice){
-    if (timeChoice == 'day'){
-    var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
-    var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
-    var newRowContent = '<tr><th>'+eventName+'</th><th>'+startTime+'</th><th>'+endTime+'</th></tr>';
-    $(newRowContent).appendTo($("#eventTable"));}
-    if ((timeChoice == 'week') || (timeChoice=='month')){
-      console.log('inside of week');
-      $('#' + selector).append('<div class=event id=event' + eventID + ' style="border: 1px solid black;"> </div>');
-      var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
-      var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
-      //var line3 = "<input type=text  name='eventDetail' value='event"+ eventID +"'>" + eventName + "  <br>";
-	var line3 = "<input type=text  name='eventDetail' value='"+ eventName +"'> <br>";
+    // if (timeChoice == 'day'){
+    // var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
+    // var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
+    // var newRowContent = '<tr><th>'+eventName+'</th><th>'+startTime+'</th><th>'+endTime+'</th></tr>';
+    // $(newRowContent).appendTo($("#eventTable"));}
+    // if ((timeChoice == 'week') || (timeChoice=='month')){
+    //   console.log('inside of week');
 
-	$("#event" + eventID.toString()).append(line1 + line2 + line3 );
+    //   var line1 = "<input type='hidden' value='"+ timeChoice +"_event' name='timeSelector'>";
+    //   var line2 = "<input type='hidden' value='event"+ eventID +"' name='eventCheck'>";//this prob should be taken out
+    //   var line3 = "<input type=text  name='eventDetail' value='event"+ eventID +"'>" + eventName + "  <br>";
+
+
+    // var line3 = "<input type=text  name='eventDetail' value='"+ eventName +"'> <br>";
+
+    $('#' + selector).append('<div class=event id=event' + eventID + '> </div>');
+    var line0 = '<div class="panel panel-default text-center" style="width:95%; margin: 10px 0 0 1%; border-width: 1px !important; border-style: solid !important; border-color:#418ACA !important;" > <div class="panel-body"><div class="pretty p-svg p-curve">';
+    var line1 = "<b>" + eventName + "</b> <br> " + startTime.slice(0,-3) + " to " + endTime.slice(0,-3);
+    var line10 = '</div></div></div></div>';
+
+
+
+    if(timeChoice=='month'){
+      line1 = "<b>" + eventName + "</b>";
+
     }
+
+
+	$("#event" + eventID.toString()).append( line0 + line1 + line10);
+
   }
 
 {% endblock %}

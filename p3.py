@@ -20,8 +20,27 @@ def cursor(database=DATABASE):
     conn = dbconn2.connect(DSN)
     return conn.cursor(MySQLdb.cursors.DictCursor)
 
+def checkUser(username,passwd):
+    curs = cursor(DATABASE)
+    curs.execute('select * from user where username = %s and psswd = %s;',(username,passwd,))
+    row = curs.fetchone()
+    return row
+
+def checkUsername(username):
+    curs = cursor(DATABASE)
+    curs.execute('select * from user where username = %s;',(username,))#check if the username is in the database already
+    row = curs.fetchone()
+    if row == None:
+        return True
+    else:
+        return False
+
+def createUser(username,passwd):
+    curs=cursor(DATABASE)
+    curs.execute('insert into user (username,psswd) values (%s,%s);',(username,passwd,))
+
+
 def getCatColors(userID):
-    userID = 1 # currently hardcoded
     curs = cursor(DATABASE)
     curs.execute('select name, color from category where userID = %s;',(userID,))
     colorsDict = curs.fetchall()
@@ -32,8 +51,7 @@ def getCatColors(userID):
 
 
 def rightPanelTask(userID):
-    getColors = getCatColors(1)
-    userID = 1 # hardcoded right now
+    getColors = getCatColors(userID)
     curs = cursor(DATABASE)
     curs.execute('select distinct parentTaskID, subTaskID from taskList where userId = %s;',(userID,))
     buildAssociation = curs.fetchall()
@@ -131,12 +149,9 @@ def deleteSubtask(taskID):
     curs = cursor(DATABASE)
     curs.execute('select * from taskList where parentTaskID = %s;',(taskID,))
     rows = curs.fetchall()
-    # print rows
-    # print len(rows)
     if len(rows)!=0:
         for row in rows:
             subTaskID = row['subTaskID']
-            # print subTaskID
             deleteSubtask(subTaskID)
             curs.execute('delete from taskList where parentTaskID = %s and subTaskID = %s;',(taskID,subTaskID,))
         curs.execute('delete from task where taskID = %s;',(taskID,))
@@ -186,6 +201,12 @@ def addSubtaskNull(userID,parent):#this needs to be an id
     curs = cursor(DATABASE)
     curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,NULL);',(userID,parent,))
 
+def checkCatColor(userID):#check all colors
+    curs = cursor(DATABASE)
+    curs.execute('select * from category where userID = %s;',(userID,))
+    rows = curs.fetchall()
+    return rows
+
 def addLog(cat,hours,userID,taskDate):
     curs = cursor(DATABASE)
     curs.execute('select * from category where name = %s;',(cat,))
@@ -203,25 +224,40 @@ def addLog(cat,hours,userID,taskDate):
     else:
         flash('please input an existing category')
 
-def checkLog(logType,userID):
+
+def checkLog(logType,userID,cat):#given logType and category, returns [[yyyy,mm,dd,hours]]
     curs = cursor(DATABASE)
-    if logType == 'day':
-        curs.execute('select taskDate,sum(hours) as accum from logEntry where userID = %s group by taskDate;',(userID,))
-    #if logType == 'day':#per week
-    #    curs.execute('select taskDate, sum(hours) as accum from logEntry where taskDate between date_sub(now(),INTERVAL 1 WEEK) and now() group by taskDate;')
-    if logType == 'week':
-        curs.execute('select taskDate, sum(hours) as accum from logEntry where userID = %s group by YEARWEEK(taskDate);',(userID,))
-    if logType == 'month':
-        curs.execute('select taskDate, sum(hours) as accum from logEntry where userID = %s group by YEAR(taskDate), MONTH(taskDate);',(userID,))
-    rows = curs.fetchall()
-    if rows!=None:
-        return rows
+    #finalResult = []
+    if cat == 'all':
+        if logType == 'day':
+            curs.execute('select taskDate,sum(hours) as hours from logEntry where userID = %s group by taskDate;',(userID,))
+        #if logType == 'day':#per week
+        #    curs.execute('select taskDate, sum(hours) as accum from logEntry where taskDate between date_sub(now(),INTERVAL 1 WEEK) and now() group by taskDate;')
+        if logType == 'week':
+            curs.execute('select taskDate, sum(hours) as hours from logEntry where userID = %s group by YEARWEEK(taskDate);',(userID,))
+        if logType == 'month':
+            curs.execute('select taskDate, sum(hours) as hours from logEntry where userID = %s group by YEAR(taskDate), MONTH(taskDate);',(userID,))
     else:
-        flash('no log record')
-        return [{'taskDate':'','accum':''}]
+        if logType == 'day':
+            curs.execute('select taskDate,hours from logEntry where userID = %s and name = %s group by taskDate;',(userID,cat,))
+        if logType == 'week':
+            curs.execute('select taskDate, hours from logEntry where userID = %s and name = %s group by YEARWEEK(taskDate);',(userID,cat,))
+        if logType == 'month':
+            curs.execute('select taskDate, hours from logEntry where userID = %s and name = %s group by YEAR(taskDate), MONTH(taskDate);',(userID,cat,))
+    rows = curs.fetchall()
+    result = []
+    if rows!=None:
+        for eachrow in rows:
+            recDate = eachrow['taskDate']
+            if recDate!=None:
+                cleanRec = [recDate.year,recDate.month,recDate.day]
+                cleanRec.append(int(eachrow['hours']))
+                result.append(cleanRec)
+    return result
+
+
 
 def addEvent(userID,eventName,eventDate,start,end):
-
     curs = cursor(DATABASE)
     curs.execute('select * from event where eventDate = %s and (%s between start and end or %s between start and end);',(eventDate,start,end,))
     row = curs.fetchone()
@@ -246,7 +282,7 @@ def addEvent(userID,eventName,eventDate,start,end):
 
 
 def rightPanelEvent(userID):
-    userID = 1 # hardcoded right now
+
     curs = cursor(DATABASE)
     curs.execute('select * from event where userId = %s;',(userID,))
     buildAssociation = curs.fetchall()

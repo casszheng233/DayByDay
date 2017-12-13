@@ -46,7 +46,7 @@ $(document).ready(function() { -->
   //put days of week into headers
   displaynames = formatWeekNames();
   for (i = 0; i < 7; i++){
-    var header = '<th>' + displaynames[i] + '</th>';
+    var header = '<th class="text-center">' + displaynames[i] + '</th>';
     $("#headers").append(header);
   }
 
@@ -54,13 +54,13 @@ $(document).ready(function() { -->
   //creates row of table into which tasks will be placed
   var week = defineWeek();
   console.log(week[0].split(','))
-  $("#weekEvents").append('<tr> <td id = ' + week[0].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[1].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[2].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[3].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[4].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[5].split(',')[2] + ' > </td>' +
-                              '<td id = ' + week[6].split(',')[2] + ' > </td>' +  '</tr>');
+  $("#weekEvents").append('<tr><td id = ' + week[0].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[1].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[2].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[3].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[4].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[5].split(',')[2] + ' style="vertical-align:top"> </td>' +
+                              '<td id = ' + week[6].split(',')[2] + ' style="vertical-align:top"> </td>' +  '</tr>');
 
   //for one task from the data structure, if the date on task matches a date to be displayed,
   //create the task in the corresponding slot of the week table

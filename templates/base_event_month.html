@@ -15,7 +15,7 @@ $(document).ready(function() { -->
   //put names of week into headers
   var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   for (i = 0; i < 7; i++){
-    var header = '<th>' + weeknames[i] + '</th>';
+    var header = '<th class = "text-center">' + weeknames[i] + '</th>';
     $("#headers").append(header);
   }``
 
@@ -67,11 +67,11 @@ $(document).ready(function() { -->
 
   function placeDayJ (j, dataStruct, date, selector){
     eventDic = dataStruct[j]
-    console.log(eventDic["eventDate"].toString() == date)
-    console.log(eventDic)
+    // console.log(eventDic["eventDate"].toString() == date)
+    // console.log(eventDic)
     if (eventDic["eventDate"].toString() == date){
-      console.log('yes')
-      buildEvent(eventDic["eventID"], eventDic["eventName"], eventDic["eventDate"], eventDic["startTime"], eventDic["endTime"],  selector, "week");
+      // console.log('yes')
+      buildEvent(eventDic["eventID"], eventDic["eventName"], eventDic["eventDate"], eventDic["startTime"], eventDic["endTime"],  selector, "month");
     }
   }
 
@@ -84,13 +84,13 @@ $(document).ready(function() { -->
     var testy = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
     displayNames = testy;
     //["11/26", "11/27", "11/28", "11/29", "11/30", "12/1", "12/2"]
-    $("#weekEvents").append('<tr> <td id = ' + displayNames[0].replace("/","_") + ' > ' + displayNames[0] + ' </td>' +
-                                '<td id = ' + displayNames[1].replace("/","_") + ' > ' + displayNames[1] + ' </td>' +
-                                '<td id = ' + displayNames[2].replace("/","_") + ' > ' + displayNames[2] + ' </td>' +
-                                '<td id = ' + displayNames[3].replace("/","_") + ' > ' + displayNames[3] + ' </td>' +
-                                '<td id = ' + displayNames[4].replace("/","_") + ' > ' + displayNames[4] + ' </td>' +
-                                '<td id = ' + displayNames[5].replace("/","_") + ' > ' + displayNames[5] + ' </td>' +
-                                '<td id = ' + displayNames[6].replace("/","_") + ' > ' + displayNames[6] + ' </td>' +  '</tr>');
+    $("#weekEvents").append('<tr> <td class="text-center" id = ' + displayNames[0].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[0] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[1].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[1] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[2].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[2] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[3].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[3] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[4].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[4] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[5].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[5] + ' </td>' +
+                                '<td class="text-center" id = ' + displayNames[6].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[6] + ' </td>' +  '</tr>');
 
     var week = defineWeek(date);
     for (j=0; j < dataStruct.length; j++ ){

@@ -3,33 +3,28 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+
     <title>DayByDay</title>
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous"> -->
 
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
+    <!-- jQuery -->
     <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.js') }}"></script>
-
-    <script src="//cdn.rawgit.com/noelboss/featherlight/1.7.9/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdn.rawgit.com/vast-engineering/jquery-popup-overlay/1.7.13/jquery.popupoverlay.js"></script>
+    <!-- cookie plugin -->
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-
     <!-- checkboxes styling -->
     <link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
-
-    <!-- For Bootstrap -->
+    <!-- bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-
-    <!-- <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.js') }}"></script> -->
+    <!-- plugin for time/date form inputs, not native to bootstrap -->
     <script type="text/javascript" src="{{ url_for('static', filename='moment/moment.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/transition.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/collapse.js') }}"></script>
-    <!-- <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/dist/bootstrap.min.js') }}"></script> -->
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/bootstrap-datetimepicker.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-datetimepicker.min.css') }}" />
+    <!-- plugin for nicely designed dropdown selectors -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
 
     <style>
 
@@ -39,89 +34,99 @@
       border: 0px;
       }
 
-    html {
-    height: 100%;
-    }
-
-    body {
+      html {
       height: 100%;
-      /*font: 1em/1.25 Arial, Helvetica, sans-serif;*/
-    }
+      }
 
-    .form-group{
-      width: 60%;
-    }
+      body {
+        height: 100%;
+        /*font: 1em/1.25 Arial, Helvetica, sans-serif;*/
+      }
 
-    /*.centerDiv {
-      text-align: center;
-    }*/
+      .form-group{
+        width: 60%;
+      }
 
-    .shit{
-      display: inline-block;
-      text-align: left;
-    }
+      /*.centerDiv {
+        text-align: center;
+      }*/
+
+      .shit{
+        display: inline-block;
+        text-align: left;
+      }
 
       #header{
-      background-color: #e7e3f7;
+      background-color: #FFFFFF;
       width: 100%;
       height: 50px;
       }
 
+
       #headerleft{
-      background-color: #e3f3f7;
-      width: 20.5%;
+      background-color: #FFFFFF;
+      width: 15%;
       height: 100%;
-      text-align:center;
+      /*text-align:center;*/
+      display: inline-block;
+      font-size: 190%;
       vertical-align: middle;
-      line-height: 30px;
+      line-height: 70px;
       }
 
-    #container{
-      background-color: #cbdaf2;
-      width: 100%;
+      #headerright{
       height: 100%;
-      border: 1px solid #4286f4;
-    }
+      width: 84.5%;
+      vertical-align: middle;
+      font-size: 190%;
+      line-height: 70px;
+      display: inline-block;
+      }
 
-    #container1{
-      background-color: #f1ccca;
-      float: left;
-      width: 20%;
-      height: 100%;
-      border: 1px solid #ff0000;
-    }
+      #container{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 100%;
+        /*border: 1px solid #4286f4;*/
+      }
 
-    #container2{
-      background-color: #cff0c9;
-      float: right;
-      width: 79.5%;
-      height: 100%;
-      border: 1px solid #ff0000;
-    }
+      #container1{
+        background-color: #FFFFFF;
+        float: left;
+        width: 15%;
+        height: 100%;
+        /*border: 1px solid #ff0000;*/
+      }
 
-    #categories{
-      /*text-align:center;*/
-      width: 40%;
-      /*border: 1px solid #ff0000;*/
-    }
+      #container2{
+        background-color: #FFFFFF;
+        float: left;
+        width: 84.5%;
+        height: 100%;
+        /*border: 1px solid #ff0000;*/
+      }
 
-    .addElements{
-      width: 80%;
-    }
+      #categories{
+        /*text-align:center;*/
+        width: 40%;
+        /*border: 1px solid #ff0000;*/
+      }
 
-    .spacer{
-      margin-bottom: 2px;
-    }
+      .addElements{
+        width: 80%;
+      }
+
+      .spacer{
+        margin-bottom: 2px;
+      }
+
+  </style>
 
 
 
+  <script>
 
-    </style>
-
-
-   <script>
-
-   // write cookies for drop-downs
+   // create cookies to save user's two drop-down value selections
    function timeChoose(){
      choice = $('#time').find(":selected").val();
      Cookies.set('timeChoice', choice);
@@ -133,46 +138,45 @@
    }
 
 
-   //if any cats checked, uncheck allCats
-   //if no cats checked, check allCats
-   //if allCats checked, uncheck others
+   //handles logic for which category checkboxes can be checked, and processes changes upon user's checkbox clicks
+   //If any cats checked, uncheck catall. If no cats checked, check catall. If catall checked, uncheck all others.
+   //Set cookies to remember user's checkbox preferences after each change.
    function checkCat(catTick, notOnLoad){
      var $inputs = $('#catTickForm :input');
      var ids = [];
      $inputs.each(function (index){
          ids.push( [$(this).attr('id') , $('#' + $(this).attr('id').replace(" ", "\\ ")).prop('checked')])
      });
-     // ids = ids.pop();
 
-     //don't allow user to select 0 categories, turn on 'all categories' if they try
      if ($("#catTickForm input:checkbox:checked").length == 0){
        $('#catall').prop('checked', true);
      }
-
      if (catTick.id == "catall"){
        $('.cat').prop('checked', false);
        setCatTickCookies();
        return;
      }
-     // returns (id,isChecked) of all checked user-submitted categoires
+
+     // returns (id,isChecked) for all checked user-submitted categories
      let catsTrue = ids.slice(1).filter( ([id,bool]) => { return bool === true })
 
      if (catsTrue.length === 0){
-       $('#catall').prop('checked', true); //for some reason attr didn't work here
+       $('#catall').prop('checked', true);
      }
      if (catsTrue.length > 0) {
+       // I swear sometimes one unchecking-method works and the other breaks randomly, so let's be safe and have both
        $('#catall').attr("checked",false);
+       $('#catall').prop('checked',false);
      }
 
-     // let allCatTrues = ids.filter(([id,bool]) => { return bool === true })
-     // $('#catTickId').val(JSON.stringify(allCatTrues));
-
-     //set cookies to remember selected cats
+     //set cookies to remember selected categories
      if (notOnLoad){
        setCatTickCookies();
      }
     }
 
+    //sets a cookie to save user's category-checkbox preferences, in a stringified
+    //dictionary of the form (category ID) : (boolean-isChecked)
     function setCatTickCookies(){
       var $inputs = $('#catTickForm :input');
       var ids = [];
@@ -183,319 +187,62 @@
       ids.pop();
       Cookies.set('catChoice', ids);
       $('#catTickId').val(JSON.stringify(ids));
-      console.log(Cookies.get('catChoice'));
     }
 
 
-   $(document).ready(function() {
+    //on page load
+    $(document).ready(function() {
 
-     // $('#collapseOne').collapse("hide");
-
-     var bootstrap3_enabled = (typeof $().emulateTransitionEnd == 'function');
-     console.log(bootstrap3_enabled);
-     // a button for testing things
-    //  $("#btnSubmit").click(function(){
-    //     $("div.time_selector select").val("week");
-    // });
-
-    //CHECK
-    {% block scriptTasks %}
-    {% endblock %}
-
-
-    //when no categories exist, block user from adding tasks
-    function taskAddable(){
-      numberOfChecked = $('input:checkbox').length;
-      if (numberOfChecked == 1){
-        $('.task_popup_open').prop('disabled', true);
+    //retrieve the two saved dropdown values
+    function loadDrops(){
+      timeChoice = Cookies.get('timeChoice');
+      dataChoice = Cookies.get('dataChoice');
+      if (timeChoice){
+       $("div.time_selector select").val(timeChoice);
       }
-      else{
-        $('.task_popup_open').prop('disabled', false);
+      if (dataChoice){
+       $("div.data_selector select").val(dataChoice);
       }
-    }
-    taskAddable();
-
-    // on page load, retrieve saved dropdown values
-     function loadDrops(){
-       timeChoice = Cookies.get('timeChoice');
-       dataChoice = Cookies.get('dataChoice');
-       if (timeChoice){
-         $("div.time_selector select").val(timeChoice);
-       }
-       if (dataChoice){
-         $("div.data_selector select").val(dataChoice);
-       }
      }
 
      loadDrops();
 
-     //on page load, retrieve saved selected categories
+     //retrieve checked categories
      function loadCats(){
        catChoice = (Cookies.get('catChoice'));
-       console.log(JSON.stringify(catChoice));
+       //if any cookie has been saved (is not user's first visit)
        if (catChoice){
-
          catChoiceObj = JSON.parse(catChoice);
          $('#catTickId').val(JSON.stringify(catChoiceObj));
-         // $('#catTickId').val(JSON.stringify(catChoiceObj));
 
+         //turn on the a checkbox if cookie value reports it was saved as checked
+         //if no checkboxes were checked, check 'catall'
          catChoiceObj.forEach((cat) => {
            if (cat[1] == true){
-             $('#' + cat[0].replace(" ", "\\ ")).prop('checked', true);
-           }});
+             $('#' + cat[0].replace(" ", "\\ ")).prop('checked', true);}});}
+           else {$('#catall').prop('checked', true);}}
 
-        } else {
-          $('#catall').prop('checked', true);
-        }
-     }
+    loadCats();
 
-     loadCats();
-     checkCat($('#allcat'),false);
+    //make sure checked cat logic is correct
+    checkCat($('#allcat'),false);
 
-
-     // toggle buttons when an 'add' window open
-     function allButtonsOff(bool){
-       $('.cat_popup_open').prop('disabled', bool);
-       $('.task_popup_open').prop('disabled', bool);
-       $('.log_popup_open').prop('disabled',bool);
-       $('.event_popup_open').prop('disabled',bool);
-     }
-
-     // callback events on opening or closing popups
-     function openPopups(selector, bool){
-       $(selector).popup({
-         onopen: function() {
-           allButtonsOff(bool);
-         }
-       });
-     }
-
-     function closePopups(selector, bool){
-       $(selector).popup({
-         onclose: function() {
-           allButtonsOff(bool);
-         }
-       });
-     }
-
-     // creating popups
-    $('#cat_popup').popup({
-      type: 'tooltip',
-      backgroundactive: true,
-      offsetleft: 450,
-      pagecontainer: '#container2'
-    });
-
-    $('#task_popup').popup({
-      type: 'tooltip',
-      offsetleft: 450,
-      backgroundactive: true,
-      pagecontainer: '#container2'
-    });
-
-    $('#log_popup').popup({
-      type: 'tooltip',
-      offsetleft: 450,
-      backgroundactive: true,
-      pagecontainer: '#container2'
-    });
-
-
-    $('#event_popup').popup({
-      type: 'tooltip',
-      offsetleft: 450,
-      backgroundactive: true,
-      pagecontainer: '#container2'
-    });
-
-    openPopups('#cat_popup',true);
-    closePopups('#cat_popup',false);
-    openPopups('#task_popup',true);
-    closePopups('#task_popup',false);
-    openPopups('#log_popup',true);
-    closePopups('#log_popup',false);
-    openPopups('#event_popup',true);
-    closePopups('#event_popup',false);
-
-
+    //handler for adding subTask-rows in option '+ Task'
     $("#add").click(function(){
       var divWrapper = $("<div class = 'addWrapper' id = 'field'>");
-      var intId = $("#task_popup div").length;
-      var testbox = $("<input type='text' name='subtask"+ intId +"'>");
+      var intId = $("#subtasks").children().length + 1;
+      var testbox = $("<input type='text' style='width:75%; display: inline-block; height: 31px;'   class='form-control' name='subtask"+ intId +"'>");
       $("#num").val(intId);
-      var removeButton = $("<input type=\"button\" class=\"remove\" value=\"-\" /><br>");
+      var removeButton = $("<input type=\"button\" class=\"remove btn btn-default\" style=\"height: 32px;line-height: 10px; font-size:200%; width:24%; padding-bottom: 12px;   \"  \" value=\"-\" /><br><br>");
        removeButton.click(function() {
            $(this).parent().remove();
        });
        divWrapper.append(testbox);
        divWrapper.append(removeButton);
        $("#subtasks").append(divWrapper);
-
-
     });
 
-
-
-   });
-
-   </script>
-
-
-
-</head>
-<body>
-
-<div id = "header">
-  <div id = "headerleft"> DayByDay </div>
-  <div id = "headerright"> </div>
-
-</div>
-
-  <div id = "container">
-
-    <!-- Left panel -->
-    <div id = "container1">
-
-
-
-
-      <br>
-      <p class = "spacer"></p>
-
-      <!-- select view for time -->
-      <form method=POST action="{{ url_for('changeView') }}">
-            <!-- <select name="time" id="time" onchange="timeChoice()"> -->
-
-            <div class = "form-group time_selector center-block">
-            <select class = "form-control" name="time" id="time" onchange="timeChoose(); this.form.submit();">
-              {% block timeSelect %}
-              <option value="day">Day View</option>
-              <option value="week">Week View</option>
-              <option value="month">Month View</option>
-              {% endblock %}
-            </select>
-          </div>
-          <p class = "spacer"></p>
-
-        <!-- select view for data -->
-          <div class = "form-group data_selector center-block">
-          <select class = "form-control" name="views" id="views" onchange="dataChoose(); this.form.submit();">
-            <option value="checklist">Checklist View</option>
-            <option value="events">Events View</option>
-            <option value="log">Log View</option>
-          </select>
-        </div>
-      </form>
-      <p class = "spacer"></p>
-
-      {% block categories %}
-      <!-- <div class = "centerDiv"> -->
-      <div class = "shit" style = "width: 20%;"> </div>
-      <div id = "categories" style = "display: inline-block;">
-        <form id = "catTickForm" method=POST action="{{ url_for('tickedCats') }}">
-
-          <div class="pretty p-default p-curve">
-              <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); this.form.submit();" value="allCats"/>
-              <div class="state p-primary">
-                  <label>All Categories</label>
-              </div>
-          </div>
-          <br>
-
-          <!-- <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); this.form.submit();" value="allCats"> All Categories <br> -->
-          {% for cat in allCats %}
-
-          <div class="pretty p-default p-curve">
-              <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true); this.form.submit();" value="{{cat['name']}}" />
-              <div class="state p-primary">
-                  <label><font color=" {{cat['color']}}  "> {{cat['name']}}  </font></label>
-              </div>
-          </div>
-          <br>
-
-          {% endfor %}
-          <input type = "hidden" name = "catHidden" id = "catTickId" value = "0">
-          <input type = "hidden" name = "catHiddenRedirect" id = "catTickRedirect" value = "0">
-        </form>
-        </div>
-      <!-- </div> -->
-      {% endblock %}
-
-  <p class = "spacer"></p>
-  <br>
-  <!-- <p class = "spacer"></p> -->
-
-  <div>
-  <div class = "shit" style = "width: 20%;" >  </div>
-
-  <div class = "addElements" style = "display: inline-block; width:60%; ">
-
-
-    <div class="bs-example">
-    <div class="panel-group" id="accordion">
-
-        <form class="panel panel-default" method=POST action="{{ url_for('addCat') }}">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" >+ Category</a>
-                </h4>
-            </div>
-            <div id="collapseOne" class="panel-collapse collapse">
-                <div class="panel-body">
-                  <input type='text' class="form-control" name='catName' placeholder="Category Name"><br>
-                  <input type='text' class="form-control" name='catColor' placeholder="Category Color"><br>
-                  <input class="btn btn-default" type="submit" value="Submit">
-                </div>
-            </div>
-        </form>
-
-        <form class="panel panel-default" method=POST action="{{ url_for('addTask') }}">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">+ Task</a>
-                </h4>
-            </div>
-            <div id="collapseTwo" class="panel-collapse collapse">
-                <div class="panel-body">
-
-
-
-
-               <select class = "form-control" name="catOpt" id = "catOpt">
-                 <option value="none">Choose Category</option>
-                 {% block add_dropdown %}
-                 {% for cat in allCats %}
-                 <option value="{{cat['name']}}"> {{cat['name']}} </option>
-                 {% endfor %}{% endblock %}
-               </select>
-               <br>
-
-
-
-                  <input type='text' class="form-control"  name='catName' placeholder="Task Name"><br>
-
-
-
-            <div class='input-group date' id='datetimepicker6'>
-                <input type='text' name='startDate' class="form-control" placeholder="Start Date"/>
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-            </div>
-
-            <br>
-
-            <div class='input-group date' id='datetimepicker7'>
-                <input type='text' name='endDate' class="form-control" placeholder="End Date"/>
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-            </div>
-            <br>
-
-
-<!-- move me -->
-<script type="text/javascript">
+    // date form element function for linked 'start date' and 'enddate' values in '+ Task'
     $(function () {
         $('#datetimepicker6').datetimepicker({format: 'YYYY-MM-DD'});
         $('#datetimepicker7').datetimepicker({
@@ -509,144 +256,297 @@
             $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
         });
     });
-</script>
+
+    // date form element function for '+ Log Entry'
+    $(function () {
+        $('#datetimepicker1').datetimepicker({format: 'YYYY-MM-DD'});
+    });
+
+    // date form element function for '+ Event'
+    $(function () {
+        $('#datetimepicker4').datetimepicker({format: 'YYYY-MM-DD'});
+    });
+
+    // start time and end time form elements functions for '+ Event'
+    $(function () {
+        $('#datetimepicker2').datetimepicker({ format: 'HH:mm' });
+    });
+    $(function () {
+      $('#datetimepicker3').datetimepicker({ format: 'HH:mm' });
+    });
+
+  });
+
+  </script>
+</head>
 
 
+<body>
 
-                  <div id = "subtasks">
-                  </div>
-                  <input class="btn btn-default" type="button" value="Add subtask" id = "add"><br>
-                  <input type = "hidden" name = "num" id = "num" value = "0">
-                  <br><input class="btn btn-default" type="submit" value="Submit">
+<div id = "header">
 
+  <div id = "headerleft"> <div class = "shit" style = "width: 14%;"> </div> DayByDay </div>
+  <div id = "headerright" > {% block timeInfo %} {% endblock %} </div>
+
+</div>
+
+<!-- Main content box that holds left panel and right panel -->
+<div id = "container">
+
+  <!-- Left panel -->
+  <div id = "container1">
+    <br><p class = "spacer"></p>
+
+      <!-- select view for time -->
+      <form method=POST action="{{ url_for('changeView') }}" style = "width: 100% !important; display: inline-block;">
+
+        <div class = "shit" style = "width: 10%;"> </div>
+        <!-- dropdown for user's time-view selection -->
+        <div class = "form-group time_selector" style = "display: inline-block; width:80% !important;">
+          <select class = "form-control"  name="time" id="time" onchange="timeChoose(); this.form.submit();" >
+          {% block timeSelect %}
+            <option value="day">Day View</option>
+            <option value="week">Week View</option>
+            <option value="month">Month View</option>
+          {% endblock %}
+          </select>
+        </div>
+        <p class = "spacer"></p>
+
+        <div class = "shit" style = "width: 10%;"> </div>
+        <!-- dropdown for user's data-view selection -->
+        <div class = "form-group data_selector" style = "display: inline-block; width:80% !important;">
+          <select class = "form-control" name="views" id="views" onchange="dataChoose(); this.form.submit();">
+            <option value="checklist">Checklist View</option>
+            <option value="events">Events View</option>
+            <option value="log">Log View</option>
+          </select>
+        </div>
+        </form>
+        <p class = "spacer"></p>
+
+        <!-- load in user's categories -->
+        {% block categories %}
+        <div class = "shit" style = "width: 10%;"> </div>
+        <div id = "categories" style = "display: inline-block;">
+          <form id = "catTickForm" method=POST action="{{ url_for('tickedCats') }}">
+
+            <!-- catall checkbox -->
+            <div class="pretty p-default p-curve">
+              <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); this.form.submit();" value="allCats"/>
+              <div class="state">
+                <label>All Categories</label>
+              </div>
+            </div>
+            <br>
+
+            <!-- for coloring styling of all user-created categories, passed in to block below -->
+            {% set d = {'418ACA':'p-primary', '5DB85B':'p-success', 'F0AD4E':'p-warning', '5BC0DE':'p-info', 'D9534E':'p-danger'} %}
+            {% for cat in allCats %}
+
+            <!-- generate checkbox for every category -->
+            <div class="pretty p-default p-curve">
+                <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true); this.form.submit();" value="{{cat['name']}}" />
+                <div class="state {{  d[cat['color']]  }} generatedCat">
+                    <label><font color=" {{cat['color']}}  "> {{cat['name']}}  </font></label>
                 </div>
             </div>
-        </form>
+            <br>
+            {% endfor %}
 
+            <!-- hidden inputs for back-end processing -->
+            <input type = "hidden" name = "catHidden" id = "catTickId" value = "0">
+            <input type = "hidden" name = "catHiddenRedirect" id = "catTickRedirect" value = "0">
+          </form>
+        </div>
 
-        <form class="panel panel-default" method=POST action="{{ url_for('addLog') }}">
-            <div class="panel-heading">
+        {% endblock %}
+
+        <p class = "spacer"></p><br>
+
+        <div>
+          <div class = "shit" style = "width: 10%;" >  </div>
+
+          <!-- all '+ Feature' items within the Bootstrap accordion are contained here -->
+          <div class = "addElements" style = "display: inline-block; width:80%; ">
+          <div class="panel-group" id="accordion">
+
+            <!-- + Category -->
+            <form class="panel panel-default" method=POST action="{{ url_for('addCat') }}">
+              <div class="panel-heading">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">+ Log Entry</a>
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" >+ Category</a>
                 </h4>
-            </div>
-            <div id="collapseThree" class="panel-collapse collapse">
+              </div>
+
+              <div id="collapseOne" class="panel-collapse collapse">
                 <div class="panel-body">
 
+                  <!-- text input category name -->
                   <input type='text' class="form-control" name='catName' placeholder="Category Name"><br>
+
+                  <!-- custom color selector dropdowm -->
+                  <select class="selectpicker" data-width="80%" name = 'catColor'>
+                    <option>Pick Color</option>
+                    <option value = "418ACA" style="background: #418ACA; color: #fff;">Blue</option>
+                    <option value = "5DB85B" style="background: #5DB85B;color: #fff;">Green</option>
+                    <option value = "F0AD4E" style="background: #F0AD4E;color: #fff;">Yellow</option>
+                    <option value = "5BC0DE" style="background: #5BC0DE;color: #fff;">Cyan</option>
+                    <option value = "D9534E" style="background: #D9534E;color: #fff;">Red</option>
+                  </select>
+
+                  <br><p class = "spacer"></p><br>
+
+                  <input class="btn btn-default" type="submit" value="Submit">
+                </div>
+              </div>
+            </form>
+
+            <!-- + Task -->
+            <form class="panel panel-default" method=POST action="{{ url_for('addTask') }}">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">+ Task</a>
+                </h4>
+              </div>
+
+              <div id="collapseTwo" class="panel-collapse collapse">
+                <div class="panel-body">
+
+                <!-- category selector dropdown -->
+                <select class = "form-control" name="catOpt" id = "catOpt">
+                 <option value="none">Choose Category</option>
+                 {% block add_dropdown %}
+                   {% for cat in allCats %}
+                    <option value="{{cat['name']}}"> {{cat['name']}} </option>
+                   {% endfor %}
+                 {% endblock %}
+                </select>
+                <br>
+
+                <!-- text input for task name -->
+                <input type='text' class="form-control"  name='catName' placeholder="Task Name"><br>
+
+                <!-- input for start date and end date -->
+                <div class='input-group date' id='datetimepicker6'>
+                    <input type='text' name='startDate' class="form-control" placeholder="Start Date"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+                <br>
+                <div class='input-group date' id='datetimepicker7'>
+                    <input type='text' name='endDate' class="form-control" placeholder="End Date"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+                <br>
+
+                <!-- where generated subtask forms are sent -->
+                <div id = "subtasks"></div>
+
+                <!-- 'add subtask' button -->
+                <input class="btn btn-default" type="button" value="Add subtask" id = "add"><br>
+                <input type = "hidden" name = "num" id = "num" value = "0"><br>
+
+                <input class="btn btn-default" type="submit" value="Submit">
+                </div>
+              </div>
+            </form>
+
+            <!-- + Log Entry -->
+            <form class="panel panel-default" method=POST action="{{ url_for('addLog') }}">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">+ Log Entry</a>
+                </h4>
+              </div>
+
+              <div id="collapseThree" class="panel-collapse collapse">
+                <div class="panel-body">
+
+                  <!-- category selector dropdown -->
+                  <select class = "form-control" name="catName" id = "catOpt">
+                    <option value="none">Choose Category</option>
+                    {% for cat in allCats %}
+                      <option value="{{cat['name']}}"> {{cat['name']}} </option>
+                    {% endfor %}
+                  </select><br>
+
+                  <!-- log number of hours input -->
                   <input type='text' class="form-control" name='hour' placeholder = "Hours"><br>
-                  <!-- <input type='text' class="form-control" name='taskDate' placeholder = "Task Date"><br> -->
 
-
+                  <!-- datepicker form element -->
                   <div class='input-group date' id='datetimepicker1'>
                       <input type='text' class="form-control" name='taskDate' placeholder = "Task Date"/>
                       <span class="input-group-addon">
                           <span class="glyphicon glyphicon-calendar"></span>
                       </span>
-                  </div>
-                  <br>
+                  </div><br>
 
-                  <script type="text/javascript">
-                      $(function () {
-                          $('#datetimepicker1').datetimepicker({format: 'YYYY-MM-DD'});
-                      });
-                  </script>
+                  <input class="btn btn-default" type="submit" value="Submit">
+                </div>
+              </div>
+            </form>
+
+            <!-- + Event -->
+            <form class="panel panel-default" method=POST action="{{ url_for('addEvent') }}">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">+ Event</a>
+                </h4>
+              </div>
+
+              <div id="collapseFour" class="panel-collapse collapse">
+                <div class="panel-body">
+
+                  <!-- event name text input -->
+                  <input type='text' class="form-control" name='eventName' placeholder="Event Name"><br>
+
+                  <!-- date form element -->
+                  <div class='input-group date' id='datetimepicker4'>
+                      <input type='text' class="form-control" name='eventDate' placeholder = "Event Date"/>
+                      <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                  </div><br>
+
+                  <!-- start time form element -->
+                  <div class='input-group date' id='datetimepicker2'>
+                      <input type='text' class="form-control" name='startTime' placeholder = "Start Time"/>
+                      <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-time"></span>
+                      </span>
+                  </div><br>
+
+                  <!-- end time form element -->
+                  <div class='input-group date' id='datetimepicker3'>
+                      <input type='text' class="form-control" name='endTime' placeholder = "End Time"/>
+                      <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-time"></span>
+                      </span>
+                  </div><br>
 
                   <input class="btn btn-default" type="submit" value="Submit">
 
+
                 </div>
+              </div>
             </form>
+          </div>
+          </div>
         </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">+ Event</a>
-                </h4>
-            </div>
-            <div id="collapseFour" class="panel-collapse collapse">
-                <div class="panel-body">
-                  NOT IMPLEMENTED YET
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-    </div>
   </div>
-  </div>
-
-      <!-- Add Category -->
-      <!-- <button class="cat_popup_open">Add Category</button>
-      <div id="cat_popup">
-        <form method=POST action="{{ url_for('addCat') }}">
-          Category Name: <input type='text' name='catName'><br>
-          Category Color: <input type='text' name='catColor'><br>
-          <input type="submit" value="Submit">
-        </form>
-        <button class="cat_popup_close">Close</button>
-      </div>
-      <br> -->
-
-
-
-
-      <!-- Add Log -->
-      <!-- <button class="log_popup_open">Add/Update Log</button>
-      <div id="log_popup">
-        <form method=POST action="{{ url_for('addLog') }}">
-          Category Name: <input type='text' name='catName'><br>
-          Hours: <input type='text' name='hour'><br>
-          Task Date: <input type='text' name='taskDate'><br>
-          <input type="submit" value="Submit">
-        </form>
-        <button class="log_popup_close">Close</button>
-      </div>
-      <br> -->
-
-      <!-- Add Event -->
-      <!-- <button class="event_popup_open">Add Event</button>
-      <div id="event_popup">
-        <form method=POST action="{{ url_for('addEvent') }}">
-          Event Name: <input type='text' name='eventName'><br>
-          Event Date (YYYY-MM-DD): <input type='text' name='eventDate'><br>
-          Start Time: <input type='text' name='startTime'><br>
-          End Time: <input type='text' name='endTime'><br>
-          <input type="submit" value="Submit">
-        </form>
-        <button class="event_popup_close">Close</button>
-      </div>
-      <br> -->
-
-
-
-
 
     <!-- Right panel -->
     <div id = "container2">
-
-      <div id = "dateinfo">
-        {% block timeInfo %} {% endblock %}
-      </div>
-
-
       {% block rightPanel %} {% endblock %}
       {% block customize %} {% endblock %}
+    </div>
 
-
-     </div>
+  <!-- end of div 'container' -->
   </div>
-
-
-
-
-
-
-
-  <!-- <input id = "btnSubmit" type="submit" value="Test"/> -->
-</div>
 
 
 {% with messages = get_flashed_messages() %}
@@ -658,10 +558,6 @@
         </div>
     {% endif %}
 {% endwith %}
-
-
-
-
 
 </body>
 </html>

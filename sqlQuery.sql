@@ -2,12 +2,14 @@ drop table if exists event;
 drop table if exists logEntry;
 drop table if exists taskList;
 drop table if exists task;
-drop table if exists user;
 drop table if exists category;
+drop table if exists user;
+
 
 Create table user(
+	username varchar(20),
 	userID int not null auto_increment,
-	psswd varchar(50),
+	psswd varchar(300),
 	Index (userID),
 	Primary key(userID)
 ) ENGINE = InnoDB;

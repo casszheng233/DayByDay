@@ -542,7 +542,7 @@
       <br>
 
       <!-- Add Event -->
-      <!-- <button class="event_popup_open">Add Event</button>
+      <button class="event_popup_open">Add Event</button>
       <div id="event_popup">
         <form method=POST action="{{ url_for('addEvent') }}">
           Event Name: <input type='text' name='eventName'><br>
@@ -553,7 +553,7 @@
         </form>
         <button class="event_popup_close">Close</button>
       </div>
-      <br> -->
+      <br>
 
 
 
@@ -637,3 +637,17 @@
         });
     </script>
 </div>
+
+
+
+
+
+
+<select title="Select your surfboard" class="selectpicker">
+  <option>Select...</option>
+  <option data-thumbnail="{{ url_for('static', filename='pics/418ACA.PNG') }}">Chrome</option>
+  <option data-thumbnail="{{ url_for('static', filename='pics/5DB85B.PNG') }}">Firefox</option>
+  <option data-thumbnail="{{ url_for('static', filename='pics/F0AD4E.PNG') }}">IE</option>
+  <option data-thumbnail="{{ url_for('static', filename='pics/5BC0DE.PNG') }}">Opera</option>
+  <option data-thumbnail="{{ url_for('static', filename='pics/D9534E.PNG') }}">Safari</option>
+</select>

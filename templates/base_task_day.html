@@ -1,17 +1,21 @@
+<!--
+     Because this inherits from base_task.html /in the middle/ of a <script> tag and document ready function,
+     the following two lines are commented out. I keep them here for easy uncommenting for my text editor
+     to properly color my code. Please let us know if this is bad form, and what alternatives there are if
+     it is.
+-->
 <!-- <script>
 $(document).ready(function() { -->
 
 {% extends "base_task.html" %}
 
 {% block customize %}
+
+  // for when page reloads upon form submission-- set current page information to return to this page
   var location = (window.location.href).split('/')[3];
   $("#catTickRedirect").val(location);
-  //general improvement: instead of pulling all tasks with dataStruct json, change so that SQL only returns
-  //tasks with current date.
 
-  //Scott: Regarding style, should this helper function be placed within placeSubtasks?
   //only build the task if its due date is the same as the current date
-
   function placeSubtasksHelper(taskDic, isParent){
     if (taskDic["end"].toString() == date){
       buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, "container2", "day");
@@ -34,8 +38,8 @@ $(document).ready(function() { -->
       }
     }
   }
-  placeSubtasks(dataStruct);
 
+  placeSubtasks(dataStruct);
 
 });
 </script>
