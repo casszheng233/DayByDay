@@ -6,7 +6,7 @@ $(document).ready(function() { -->
 {% block customize %}
 
   var location = (window.location.href).split('/')[3];
-  //$("#catTickRedirect").val(location);
+  $("#catTickRedirect").val(location);
 
   //create table to seperate days of week and contain tasks
   $("#container2").append('<table style="width:100%; table-layout:fixed; border-collapse: collapse;" id = "weekEvents" ></table>')

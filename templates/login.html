@@ -2,24 +2,31 @@
 <html lang='en'>
 <style>
 body {
-    background: url('https://images.pexels.com/photos/636243/pexels-photo-636243.jpeg?w=940&h=650&dpr=2&auto=compress&cs=tinysrgb') no-repeat fixed center center;
+    background: url('http://i.stack.imgur.com/jGlzr.png') no-repeat fixed center center;
+    /* background: url('http://backgroundlabs.com/wp-content/uploads/2013/05/old-paper-background.jpg') no-repeat fixed center center; */
+
     background-size: cover;
     font-family: Montserrat;
+    /* background-color: #d3d3d3; */
 }
 
 .logo {
     width: 213px;
     height: 36px;
-    background: url('http://interactimage.com/php/files/4vliqjkoq58cn3514g5mp405i31513111475.jpg') no-repeat;
+
+    /* background: url('http://interactimage.com/php/files/4vliqjkoq58cn3514g5mp405i31513111475.jpg') no-repeat; */
     margin: 30px auto;
 }
 
 .login-block {
     width: 320px;
     padding: 20px;
-    background: #fff;
+    background-color:#FFF5EE;
+	/*background-color: rgba(240, 255, 255, 0.5);*/
+    /* background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/16_wood_samples.jpg/350px-16_wood_samples.jpg') no-repeat; */
+    opacity:0.8;
     border-radius: 5px;
-    border-top: 5px solid #ff656c;
+    border-top: 5px solid #A0522D;
     margin: 0 auto;
 }
 
@@ -107,7 +114,7 @@ body {
     Username: <input type='text' name='userID' id ='userID'><br>
     Password: <input type='password' name='passwd'><br>
     <input type="submit" value="LOG ME IN :)">
-    <input type ="submit" value="NEW USER?" formaction="{{url_for('createUser')}}">
+    <input type ="submit" value="Create Account" formaction="{{url_for('createUser')}}">
 
   </form>
 </div>

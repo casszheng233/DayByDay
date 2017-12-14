@@ -119,7 +119,27 @@
       .spacer{
         margin-bottom: 2px;
       }
+      .button {
+          left:50px;
+          padding: 8px 25px;
+          font-size: 20px;
+          text-align: center;
+          cursor: pointer;
+          outline: none;
+          color: #fff;
+          background-color: #966F33;
+          border: none;
+          border-radius: 15px;
+          box-shadow: 0 9px #999;
+        }
 
+      .button:hover {background-color: #800000}
+
+      .button:active {
+        background-color: #800000;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+      }
       /*.panel-body-month {
         padding: 0 0 0 0;}*/
 
@@ -537,6 +557,15 @@
                 </div>
               </div>
             </form>
+
+            <p class = "spacer"></p>
+
+            <div class = "spacer123" style = "width: 10%;"> </div>
+            <div>
+            <form action="{{ url_for('logout') }}" method="post">
+                <button class = "button" name="logout" type="submit">Log me Out!</button>
+            </form>
+          </div>
           </div>
           </div>
         </div>
@@ -552,15 +581,16 @@
   </div>
 
 
-{% with messages = get_flashed_messages() %}
+  {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <div id="messages">
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor %}
-        </div>
+      <script>
+        var messages = {{ messages | safe }};
+        for (var i=0; i<messages.length; i++) {
+          alert(messages[i]);
+        }
+      </script>
     {% endif %}
-{% endwith %}
+  {% endwith %}
 
 </body>
 </html>
