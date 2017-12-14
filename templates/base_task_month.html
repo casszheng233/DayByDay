@@ -4,8 +4,8 @@
      to properly color my code. Please let us know if this is bad form, and what alternatives there are if
      it is.
 -->
-<!-- <script>
-$(document).ready(function() { -->
+<script>
+$(document).ready(function() {
 
 {% extends "base_task.html" %}
 
@@ -16,13 +16,13 @@ $(document).ready(function() { -->
   $("#catTickRedirect").val(location);
 
   //create table to seperate days of week into columns, and contain tasks
-  $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekTasks" ></table>')
+  $("#container2").append('<table style="width:100%; table-layout:fixed; border-collapse: collapse;" id = "weekTasks" ></table>')
 
   //put names of weekdays into header row
   $("#weekTasks").append('<tr id = headers>   </tr>');
   var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   for (i = 0; i < 7; i++){
-    var header = '<th class = "text-center">' + weeknames[i] + '</th>';
+    var header = '<th class = "text-center" style = "width: 10%;" >' + weeknames[i] + '</th>';
     $("#headers").append(header);
   }``
 
@@ -77,6 +77,7 @@ $(document).ready(function() { -->
     //makes sure task's due date is the same as the relevant date, and builds task
     function placer(taskDic, isParent, selector){
       if (taskDic["end"].toString() == date){
+        var hi = 0;
         buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "month");
       }
     }
@@ -97,20 +98,25 @@ $(document).ready(function() { -->
     var displayNames = formatWeekNames(date);
     var current = new Date();
     var month = current.getMonth() + 1;
-    var onlyCurrentMonth = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
+    var onlyCurrentMonth = displayNames.map((date) => { if (date.split('/')[0] != month){ return ' '; } else { return ('id = ' + date); }});
     displayNames = onlyCurrentMonth;
-    $("#weekTasks").append('<tr> <td class="text-center" id = ' + displayNames[0].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[0] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[1].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[1] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[2].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[2] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[3].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[3] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[4].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[4] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[5].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[5] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[6].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[6] + ' </td>' +  '</tr>');
+
+    //console.log(displayNames);
+    console.log(displayNames[0]); //really jank please fix
+    $("#weekTasks").append('<tr style ="height:130px;"> <td class="text-center" ' + displayNames[0].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[0].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[1].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[1].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[2].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[2].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[3].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[3].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[4].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[4].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[5].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[5].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[6].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[6].slice(-5) + ' </td>' +  '</tr>');
 
     var week = defineWeek(date);
     for (j=0; j < dataStruct.length; j++ ){
       for (w = 0; w < 7; w++){
         placeSubtasksHelper(j, dataStruct, week[w], week[w].split(',')[1] + "_" + week[w].split(',')[2]);
+        // console.log(week[w].split(',')[1] + "_" + week[w].split(',')[2]);
+
       }
     }
   }

@@ -47,6 +47,8 @@ $(document).ready(function() {
 
     $('#' + selector).append('<div class=event id=event' + eventID + '> </div>');
     var line0 = '<div class="panel panel-default text-center" style="width:95%; margin: 10px 0 0 1%; border-width: 1px !important; border-style: solid !important; border-color:#418ACA !important;" > <div class="panel-body"><div class="pretty p-svg p-curve">';
+    var line0month = '<div class="panel panel-default text-center" style="width:95%; margin: 10px 0 0 2%; border-width: 1px !important; border-style: solid !important; border-color:#418ACA !important;" > <div class="panel-body" style = "padding: 2px 0 !important"><div class="pretty p-svg p-curve">';
+
     var line1 = "<b>" + eventName + "</b> <br> " + startTime.slice(0,-3) + " to " + endTime.slice(0,-3);
     var line10 = '</div></div></div></div>';
 
@@ -54,7 +56,7 @@ $(document).ready(function() {
 
     if(timeChoice=='month'){
       line1 = "<b>" + eventName + "</b>";
-
+      line0 = line0month;
     }
 
 

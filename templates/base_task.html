@@ -68,7 +68,8 @@ $(document).ready(function() {
     $('#' + selector).append('<form method=POST action="{{ url_for("tickTask") }}">   <div class=task id=task' + taskID + ' >   </div></form>');
 
     // styling of panel
-    var line0 = '<div class="panel panel-default" style="width:95%; margin: 10px 2% 0 1%; border-width: 1px !important; border-style: solid !important; border-color:#'+ catColor +' !important;" > <div class="panel-body"><div class="pretty p-svg p-curve">';
+    var line0 =      '<div class="panel panel-default" style="width:95%; margin: 10px 2% 0 1%; border-width: 1px !important; border-style: solid !important; border-color:#'+ catColor +' !important;" > <div class="panel-body"><div class="pretty p-svg p-curve">';
+    var line0month = '<div class="panel panel-default" style="width:95%; margin: 10px 2% 0 2%; border-width: 1px !important; border-style: solid !important; border-color:#'+ catColor +' !important;" > <div class="panel-body" style = "padding: 2px 0 !important"><div class="pretty p-svg p-curve">';
 
     //form items: hidden form values for backend processing, and the checkbox
     var line1 = "<input type='hidden' value='"+ timeChoice +"_checklist' name='timeSelector'>";
@@ -83,11 +84,15 @@ $(document).ready(function() {
     var line5 = '<label>'+ nameParent +'</label>';
     var line6 = '</div></div></div></div>';
 
-    $("#task" + taskID.toString()).append(line0 + line1 + line2 + line3 + line4 + line5 + line6);
+    if (timeChoice == "month"){
+      $("#task" + taskID.toString()).append(line0month + line1 + line2 + line3 + line4 + line5 + line6);
+    } else {
+      $("#task" + taskID.toString()).append(line0 + line1 + line2 + line3 + line4 + line5 + line6);
+    }
   }
 
 {% endblock %}
 
-// base_task_day, week, and month inherit this file and add code in this block
+// base_task_day, week, and month inherit this file and add their own code in 'customize'
 {% block customize %}
 {% endblock %}

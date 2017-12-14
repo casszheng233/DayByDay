@@ -9,13 +9,13 @@ $(document).ready(function() { -->
   //$("#catTickRedirect").val(location);
 
   //create table to seperate days of week and contain tasks
-  $("#container2").append('<table style="width:100%; border-style: solid;" id = "weekEvents" ></table>')
+  $("#container2").append('<table style="width:100%; table-layout:fixed; border-collapse: collapse;" id = "weekEvents" ></table>')
   $("#weekEvents").append('<tr id = headers>   </tr>');
 
   //put names of week into headers
   var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   for (i = 0; i < 7; i++){
-    var header = '<th class = "text-center">' + weeknames[i] + '</th>';
+    var header = '<th class = "text-center" style = "width: 10%;">' + weeknames[i] + '</th>';
     $("#headers").append(header);
   }``
 
@@ -81,16 +81,17 @@ $(document).ready(function() { -->
     var displayNames = formatWeekNames(date);
     var current = new Date();
     var month = current.getMonth() + 1;
-    var testy = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return date; }});
+    var testy = displayNames.map((date) => { if (date.split('/')[0] != month){ return ""; } else { return ('id = ' + date); }});
     displayNames = testy;
     //["11/26", "11/27", "11/28", "11/29", "11/30", "12/1", "12/2"]
-    $("#weekEvents").append('<tr> <td class="text-center" id = ' + displayNames[0].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[0] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[1].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[1] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[2].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[2] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[3].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[3] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[4].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[4] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[5].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[5] + ' </td>' +
-                                '<td class="text-center" id = ' + displayNames[6].replace("/","_") + ' style="vertical-align:top"> ' + displayNames[6] + ' </td>' +  '</tr>');
+    $("#weekEvents").append('<tr style ="height:130px;"> ' +
+                                '<td class="text-center" ' + displayNames[0].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[0].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[1].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[1].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[2].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[2].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[3].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[3].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[4].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[4].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[5].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[5].slice(-5) + ' </td>' +
+                                '<td class="text-center" ' + displayNames[6].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[6].slice(-5) + ' </td>' +  '</tr>');
 
     var week = defineWeek(date);
     for (j=0; j < dataStruct.length; j++ ){
