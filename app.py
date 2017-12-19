@@ -18,6 +18,7 @@ app.secret_key = "whatever"
 def initialPage():
     return render_template('login.html')
 
+# logging in redirects to the only url in use now, /DayByDay/
 @app.route('/login/',methods = ['GET','POST'])
 def login():#login page
     conn = p3.getConnection()
@@ -32,6 +33,7 @@ def login():#login page
         flash('No record is matched. Try again or create a new account!')
         return render_template('login.html', database=DATABASE)
 
+# default page is day-task
 @app.route('/DayByDay/',methods = ['GET','POST'])
 def dayByDay():
     try:
