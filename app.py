@@ -1,49 +1,63 @@
-#CS304 Phase3 draft
-#app.py
-#Rosie Pyktel and Cassandra Zheng
-from flask import Flask, render_template, flash, request, redirect, url_for, session
+# CS304 Final Project
+# Alpha Version
+# app.py
+# Rosie Pyktel and Cassandra Zheng
+from flask import Flask, render_template, flash, request, redirect, url_for, session, jsonify
 import os
 import p3
 import datetime as dt
 import hashlib
+from DSN import *
 
 app = Flask(__name__)
 app.secret_key = "whatever"
+#DATABASE = 'czheng_db'
 
-# DATABASE = 'czheng_db'
-DATABASE = 'rpyktel_db'
-
-# html base template, never seen
+# html base template
 @app.route('/')
 def initialPage():
     return render_template('login.html')
 
 @app.route('/login/',methods = ['GET','POST'])
-def login():
+def login():#login page
+    conn = p3.getConnection()
     userID = request.form['userID']
     password = request.form['passwd']
-    passwd = hashlib.sha256(password).hexdigest()
-
-    row = p3.checkUser(userID,passwd)
-
+    passwd = hashlib.sha256(password).hexdigest()#hashing password
+    row = p3.checkUser(conn,userID,passwd)#check the account exist/password match with the account
     if row!=None:
         session['userID'] = row['userID']
-        print row['userID']
-        print session['userID']
-        return redirect(url_for('day_checklist'))
-    else:
-        flash('Check your input!')
+        return redirect(url_for('dayByDay'))
+    else:#wrong information
+        flash('No record is matched. Try again or create a new account!')
         return render_template('login.html', database=DATABASE)
 
+@app.route('/DayByDay/',methods = ['GET','POST'])
+def dayByDay():
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelTask(conn,userID)
+            return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
+
 @app.route('/createUser/',methods = ['POST'])
-def createUser():
+def createUser():#create a new user account
+    conn = p3.getConnection()
     username = request.form['userID']#@TODO:RENAME THIS
     passwd = request.form['passwd']
     encryption = hashlib.sha256(passwd).hexdigest()
-    print encryption
-    if username.split()!=[] and passwd.split()!=[] and p3.checkUsername(username) :
-        p3.createUser(username,encryption)
-        flash('successfully create username')
+
+    #check if input is valid
+    if username.split()!=[] and passwd.split()!=[] and p3.checkUsername(conn,username) :
+        p3.createUser(conn,username,encryption)
+        flash('User created! Please sign in.')
     else:
         flash('you may want to think of another name')
     return render_template('login.html', database=DATABASE)
@@ -68,309 +82,649 @@ def legalDate(inputDate):
     except:
         return False
 
-
-# version with categories filled out
-# @app.route('/')
-# def fillCats():
-#     allCats = p3.getCats(1)
-#     dropCats = p3.getCats(1)
-#     return redirect(url_for('day_checklist'))
-
-# routing for adding a category
-#todo: add error handling for if catName not unique, add a better way to select a color
+#create new category: catName, catColor
 @app.route('/addCat/', methods = ['POST'])
 def addCat():
-    userID = session['userID']
-    name = request.form['catName']
-    color = request.form['catColor']
-    if name.split()!=[]:
-        p3.addCat(name,color,userID)#last one is userID
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
 
-    else:
-        flash('please enter all required information')
-    # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-    allCats = p3.getCats(userID)
-    return render_template('base.html', allCats =  allCats, database = DATABASE)
+            if (request.form['catName'] == "") or (request.form['catColor'] == ""):
+                return jsonify({"error":"Empty inputs!"})
 
-# todo: move some of this logic to p3.py
+            name = request.form['catName']
+            color = request.form['catColor']
+
+            checkError = p3.addCat(conn,name,color,userID)
+            if (checkError):
+                return jsonify({"error":"Duplicate category!"})
+
+            data = {"catName": name, "catColor": color}
+            return jsonify(data)
+        else:
+            flash('not logged in!')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
+
+#create a new task
 @app.route('/addTask/', methods = ['POST'])
 def addTask():
-    userID = session['userID']
-    # print "adding tasks"
-    allCats = p3.getCats(userID) #need to take care of userID
-    isFinished = 0 #default:not finished
-    taskName = request.form['catName'] #should we change the name of this varchar
-    # userID = userID #currently hard coded, need to change once we have the login page
-    start = request.form['startDate']
-    end = request.form['endDate']
-    cat = request.form['catOpt']
     try:
-        if taskName.split()!=[] and legalDate(start) and legalDate(end):
-            p3.addTask(isFinished,userID,taskName,start,end,cat)
-            checkID = p3.checkTaskID(taskName,start,end)
-            if checkID!=None:
-                parID = checkID['taskID']
-                numSubtask = int(request.form['num']) #check number of subtasks
-                print numSubtask
-                if (numSubtask == 0):
-                    p3.addSubtaskNull(userID,parID)
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            isFinished = 0
+            taskName = request.form['catName']
+            start = request.form['startDate']
+            end = request.form['endDate']
+            cat = request.form['catOpt']
 
-                for i in range(1,numSubtask+1):
-                        sub = request.form['subtask'+str(i)]
-                        print sub
-                        if sub.split()!=[]:
-                            startDT = dt.datetime.strptime(start,'%Y-%m-%d')
-                            endDT = dt.datetime.strptime(end,'%Y-%m-%d')
-                            numDays = endDT - startDT
-                            length = numDays/numSubtask
-                            daysFromStart = (length*i).days
+            try:
+                if taskName.split()!=[] and legalDate(start) and legalDate(end):
+                    checkError = p3.addTask(conn,isFinished,userID,taskName,start,end,cat)
+                    if (checkError):
+                        return jsonify({"error":"Duplicate task!"})
 
-                            endFormatted = startDT + dt.timedelta(days = daysFromStart)
-                            endFormat = str(endFormatted)[:-9]
+                    checkID = p3.checkTaskID(conn,taskName,start,end)
+                    if checkID!=None:
+                        parID = checkID['taskID']
+                        numSubtask = int(request.form['num']) #check number of subtasks
+                        print numSubtask
+                        if (numSubtask == 0):
+                            p3.addSubtaskNull(conn,userID,parID)
 
-                            # print 'subTask'+str(i)
-                            # print " "
-                            p3.addTask(isFinished,userID,sub,start,endFormat,cat)
-                            print "subtaskAdded"
-                            childID = p3.checkTaskID(sub,start,endFormat)['taskID']
-                            p3.addSubtask(userID,parID,childID)
+                        for i in range(1,numSubtask+1):
+                                sub = request.form['subtask'+str(i)]
+                                print sub
+                                if sub.split()!=[]:
+                                    startDT = dt.datetime.strptime(start,'%Y-%m-%d')
+                                    endDT = dt.datetime.strptime(end,'%Y-%m-%d')
+                                    numDays = endDT - startDT
+                                    length = numDays/numSubtask
+                                    daysFromStart = (length*i).days
+
+                                    endFormatted = startDT + dt.timedelta(days = daysFromStart)
+                                    endFormat = str(endFormatted)[:-9]
+
+                                    p3.addTask(conn,isFinished,userID,sub,start,endFormat,cat)
+                                    print "subtaskAdded"
+                                    childID = p3.checkTaskID(conn,sub,start,endFormat)['taskID']
+                                    p3.addSubtask(conn,userID,parID,childID)
+                else:
+                    return jsonify({"error":"Empty inputs!"})
+
+                jsonData = p3.rightPanelTask(conn,userID)
+                return jsonify(jsonData)
+
+            except:
+                flash('something is wrong: check your entries!')
+                return render_template('base.html', allCats =  allCats, database = DATABASE)
         else:
-            flash('please check your entries!')
-        # dropdowns = p3.buildDropdown(request.form['time'],request.form['views'])
-        return render_template('base.html', allCats =  allCats, database = DATABASE)
-
+            print "omg 2"
+            return render_template('login.html')
     except:
-        flash('something is wrong: check your entries!')
-        return render_template('base.html', allCats =  allCats, database = DATABASE)
+        print "omg3"
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/deleteTask/', methods = ['POST'])
 def deleteTask():
-    userID = session['userID']
-    allCats = p3.getCats(userID)#need to take care of userID
-    taskName = request.form['catName']#should we change the name of this varchar
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(userID)#need to take care of userID
+            taskName = request.form['catName']#should we change the name of this varchar
 
-    start = request.form['startDate']
-    end = request.form['endDate']
-    cat = request.form['catOpt']
-    p3.deleteTask(userID,taskName,start,end,cat)
-    return render_template('base.html', database=DATABASE,allCats = allCats)
+            start = request.form['startDate']
+            end = request.form['endDate']
+            cat = request.form['catOpt']
+            p3.deleteTask(userID,taskName,start,end,cat)
+            return render_template('base.html', database=DATABASE,allCats = allCats)
+        else:
+            flash('not currently logged in')
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 
-# TODO
 @app.route('/tickTask/', methods = ['GET','POST'])
 def tickTask():
-    if request.method == 'POST':
-        value = request.form['taskCheck']
-        redirectVal = request.form['timeSelector']
-        p3.tickBox(value)
-        # print value
-    return redirect(url_for(redirectVal))
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            if request.method == 'POST':
+                value = request.form['taskCheck']
+                redirectVal = request.form['timeSelector']
+                p3.tickBox(conn,value)
+                # print redirectVal
+            # return redirect(url_for(redirectVal))
+            return json.dumps({'status':'OK','user':value,'pass':redirectVal});
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/tickedCats/', methods = ['GET', 'POST'])
 def tickedCats():
-    redirDic = {"day-checklist":"day_checklist","week-checklist":"week_checklist","month-checklist":"month_checklist",
-    "day-event":"day_event","week-event":"week_event","month-event":"month_event",
-    "day-logview":"day_logview","week-logview":"week_logview","month-logview":"month_logview"}
-    if request.method == 'POST':
-        value = request.form['catHidden']
-        redir = request.form['catHiddenRedirect']
+    conn = p3.getConnection()
+    if 'userID' in session:
+        userID = session['userID']
+        if request.method == 'POST':
+            # value = request.form['catHidden']
+            dataSelection = request.form['catHiddenRedirect']
 
-        # print redir
+            if (dataSelection == "checklist"):
+                dataStruct = p3.rightPanelTask(conn,userID)
+                return jsonify(dataStruct)
+            if (dataSelection == "events"):
+                dataStruct = p3.rightPanelEvent(conn,userID)
+                return jsonify(dataStruct)
+            if (dataSelection == "log"):
+                allCats = p3.getCats(conn,userID)
+                dataStruct = p3.allLog(conn,userID,allCats)
+                return jsonify(dataStruct)
 
-    return redirect(url_for(redirDic[redir])) #todo: go to wherever they were
+    return jsonify({"error":"oh my god2"})
 
 
+
+# @app.route('/tickedCats/', methods = ['GET', 'POST'])
+# def tickedCats():
+#     try:
+#         conn = p3.getConnection()
+#         if 'userID' in session:
+#             print "userID is in session"
+#             if request.method == 'POST':
+#                 print "it's a post"
+#                 print "big cocks"
+#                 # value = request.form['catHidden']
+#                 dataSelection = request.form['catHiddenRedirect']
+#
+#                 # print value
+#                 print dataSelection
+#
+#                 if (dataSelection == "checklist"):
+#                     dataStruct = p3.rightPanelTask(conn,userID)
+#                     return jsonify(dataStruct)
+#                 # if (dataSelection == "events"):
+#                 #     dataStruct = p3.rightPanelEvent(conn,userID)
+#                 #     return jsonify(dataStruct)
+#                 # if (dataSelection == "log"):
+#                 #     print "TODO"
+#
+#                 return jsonify({"error":"oh my god1"})
+#
+#                 # timeSelection = redir.split('-')[0]
+#                 # dataSelection = redir.split('-')[1]
+#
+#                 # print timeSelection
+#                 # print dataSelection
+#
+#                 # if (dataSelection == "checklist"):
+#                 #     dataStruct = p3.rightPanelTask(conn,userID)
+#                 #     return jsonify(dataStruct)
+#                 # if (dataSelection == "events"):
+#                 #     dataStruct = p3.rightPanelEvent(conn,userID)
+#                 #     return jsonify(dataStruct)
+#                 # if (dataSelection == "log"):
+#                 #     print "TODO"
+#
+#             # redirDic = {"day-checklist":"day_checklist","week-checklist":"week_checklist","month-checklist":"month_checklist",
+#             # "day-event":"day_event","week-event":"week_event","month-event":"month_event",
+#             # "day-logview":"day_logview","week-logview":"week_logview","month-logview":"month_logview"}
+#             # if request.method == 'POST':
+#             #     value = request.form['catHidden']
+#             #     redir = request.form['catHiddenRedirect']
+#
+#             # return redirect(url_for(redirDic[redir]))
+#             return jsonify({"error":"oh my god2"})
+#         else:
+#             print "something happened1"
+#             return render_template('login.html')
+#     except:
+#         flash('Error! Redirecting to login page')
+#         print "something happened2"
+#         return render_template('login.html')
+
+
+
+#input a new log
 @app.route('/addLog/',methods = ['POST'])
 def addLog():
-    userID = session['userID']
-    allCats = p3.getCats(userID)
-    cat = request.form['catName']
-    hours = request.form['hour']
-    taskDate = request.form['taskDate']
-    # userID = 1 #hard coded, need to be changed
     try:
-        if legalDate(taskDate) and int(hours)>0: #check if input is legal
-            p3.addLog(cat,hours,userID,taskDate)
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            cat = request.form['catName']
+            hours = request.form['hour']
+            taskDate = request.form['taskDate']
+            try:
+                if legalDate(taskDate) and int(hours)>0: #check if input is legal
+                    p3.addLog(conn,cat,hours,userID,taskDate)
+                else:
+                    # print "check input!!!"
+                    flash('check your input')
+                    return jsonify({"error":"Empty inputs!"})
+                # return redirect(url_for('day_logview'))
+                #data = {"cat": cat,"hour":hours,"taskDate":taskDate}
+
+                # logDictDay = {}
+                # logDictDay['all'] = p3.checkLog(conn,'day',userID,'all')
+                # for eachCat in allCats:
+                #     cat = eachCat['name']
+                #
+                #     catInfo = p3.checkLog(conn,'day',userID,cat)#list of dictionary
+                #     logDictDay[str(cat)] = p3.checkLog(conn,'day',userID,cat)
+                #
+                #
+                # logDictWeek = {}
+                # logDictWeek['all'] = p3.checkLog(conn,'week',userID,'all')
+                # for eachCat in allCats:
+                #     cat = eachCat['name']
+                #
+                #     catInfo = p3.checkLog(conn,'week',userID,cat)#list of dictionary
+                #     logDictWeek[str(cat)] = p3.checkLog(conn,'week',userID,cat)
+                #
+                # logDictMonth = {}
+                # logDictMonth['all'] = p3.checkLog(conn,'month',userID,'all')
+                # for eachCat in allCats:
+                #     cat = eachCat['name']
+                #
+                #     catInfo = p3.checkLog(conn,'month',userID,cat)#list of dictionary
+                #     logDictMonth[str(cat)] = p3.checkLog(conn,'month',userID,cat)
+                #
+                # colorRows = p3.checkCatColor(conn,userID)
+                # colorDict = {}
+                # colorDict['all']='000000'
+                # if colorRows != None:
+                #     for eachRow in colorRows:
+                #         colorDict[str(eachRow['name'])]=str(eachRow['color'])
+
+                #dataDay = p3.checkLog(conn,'day','userID')
+                dataStruct = p3.allLog(conn,userID,allCats)
+                return jsonify(dataStruct)
+
+                # return jsonify([logDictDay,logDictWeek, logDictMonth, colorDict])
+            except:
+                flash('check your input')
+                # print("very wrong!!!!")
+                # return redirect(url_for('login.html'))
+                return jsonify({"error":"Not a valid number!"})
         else:
-            flash('check your input')
-        return render_template('base.html',allCats = allCats, database = DATABASE)
+            return render_template('login.html')
     except:
-        flash('check your input')
-        return render_template('base.html',allCats = allCats, database = DATABASE)
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 
 @app.route('/changeView/', methods = ['POST'])
 def changeView():
-    userID = session['userID']
-    allCats = p3.getCats(userID)
-    timeSelection = request.form['time']
-    dataSelection = request.form['views']
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            timeSelection = request.form['time']
+            dataSelection = request.form['views']
 
-    #routing for log
-    if (timeSelection == "day" and dataSelection == "log"):
-        print "day log"
-        return redirect(url_for('day_logview'))
-    elif (timeSelection == "week" and dataSelection == "log"):
-        print "week log"
-        return redirect(url_for('week_logview'))
-    elif (timeSelection == "month" and dataSelection == "log"):
-        print "month log"
-        return redirect(url_for('month_logview'))
+            if (dataSelection == "checklist"):
+                dataStruct = p3.rightPanelTask(conn,userID)
+                return jsonify(dataStruct)
+            if (dataSelection == "events"):
+                dataStruct = p3.rightPanelEvent(conn,userID)
+                return jsonify(dataStruct)
+            if (dataSelection == "log"):
+                print "at dataselectionlog!"
+                dataStruct = p3.allLog(conn,userID,allCats)
+                print dataStruct
+                return jsonify(dataStruct)
 
-    # routing for checklist
-    if (timeSelection == "day" and dataSelection == "checklist"):
-        return redirect(url_for('day_checklist'))
-    if (timeSelection == "week" and dataSelection == "checklist"):
-        return redirect(url_for('week_checklist'))
-    if (timeSelection == "month" and dataSelection == "checklist"):
-        return redirect(url_for('month_checklist'))
 
-    #routing for events
-    if (timeSelection == "day" and dataSelection == "events"):
-        return redirect(url_for('day_event'))
-    if (timeSelection == "week" and dataSelection == "events"):
-        return redirect(url_for('week_event'))
-    if (timeSelection == "month" and dataSelection == "events"):
-        return redirect(url_for('month_event'))
-    else:
-        rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
-        dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-        return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+
+
+
+            #routing for log
+            # if (timeSelection == "day" and dataSelection == "log"):
+            #     print "day log"
+            #     return redirect(url_for('day_logview'))
+            # elif (timeSelection == "week" and dataSelection == "log"):
+            #     print "week log"
+            #     return redirect(url_for('week_logview'))
+            # elif (timeSelection == "month" and dataSelection == "log"):
+            #     print "month log"
+            #     return redirect(url_for('month_logview'))
+            #
+            # # routing for checklist
+            # if (timeSelection == "day" and dataSelection == "checklist"):
+            #     return redirect(url_for('day_checklist'))
+            # if (timeSelection == "week" and dataSelection == "checklist"):
+            #     return redirect(url_for('week_checklist'))
+            # if (timeSelection == "month" and dataSelection == "checklist"):
+            #     return redirect(url_for('month_checklist'))
+            #
+            # #routing for events
+            # if (timeSelection == "day" and dataSelection == "events"):
+            #     return redirect(url_for('day_event'))
+            # if (timeSelection == "week" and dataSelection == "events"):
+            #     return redirect(url_for('week_event'))
+            # if (timeSelection == "month" and dataSelection == "events"):
+            #     return redirect(url_for('month_event'))
+            # else:
+            #     rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
+            #     dropdowns = p3.buildDropdown(timeSelection,dataSelection)
+            #     return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/day-logview/', methods = ['GET','POST'])
 def day_logview():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    dFormat = "MMM/DD/YYYY"
-    intervalGap = 1
-    intType = 'day'
-    logDict = {}
-    logDict['all'] = p3.checkLog('day',userID,'all')
-    for eachCat in allCats:
-        cat = eachCat['name']
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            dFormat = "MMM/DD/YYYY"
+            intervalGap = 1
+            intType = 'day'
+            logDict = {}
+            logDict['all'] = p3.checkLog(conn,'day',userID,'all')
+            for eachCat in allCats:
+                cat = eachCat['name']
 
-        catInfo = p3.checkLog('day',userID,cat)#list of dictionary
-        logDict[str(cat)] = p3.checkLog('day',userID,cat)
-    colorRows = p3.checkCatColor(userID)
-    colorDict = {}
-    colorDict['all']='black'
-    if colorRows != None:
-        for eachRow in colorRows:
-            colorDict[str(eachRow['name'])]=str(eachRow['color'])
+                catInfo = p3.checkLog(conn,'day',userID,cat)#list of dictionary
+                logDict[str(cat)] = p3.checkLog(conn,'day',userID,cat)
+            colorRows = p3.checkCatColor(conn,userID)
+            colorDict = {}
+            colorDict['all']='000000'
+            if colorRows != None:
+                for eachRow in colorRows:
+                    colorDict[str(eachRow['name'])]=str(eachRow['color'])
 
-    return render_template('base_log_day.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap,colorDict = colorDict )
+            return render_template('base_log_day.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap,colorDict = colorDict )
 
-
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/week-logview/', methods = ['GET','POST'])
 def week_logview():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    dFormat = "MMM/DD/YYYY"
-    intervalGap = 7
-    intType = 'day'
-    logDict = {}
-    logDict['all'] = p3.checkLog('week',userID,'all')
-    for eachCat in allCats:
-        cat = eachCat['name']
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            dFormat = "MMM/DD/YYYY"
+            intervalGap = 7
+            intType = 'day'
+            logDict = {}
+            logDict['all'] = p3.checkLog(conn,'week',userID,'all')
+            for eachCat in allCats:
+                cat = eachCat['name']
 
-        catInfo = p3.checkLog('week',userID,cat)#list of dictionary
-        logDict[str(cat)] = p3.checkLog('week',userID,cat)
-    colorRows = p3.checkCatColor(userID)
-    colorDict = {}
-    colorDict['all']='black'
-    if colorRows != None:
-        for eachRow in colorRows:
-            colorDict[str(eachRow['name'])]=str(eachRow['color'])
-    return render_template('base_log_week.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap, colorDict=colorDict )
+                catInfo = p3.checkLog(conn,'week',userID,cat)#list of dictionary
+                logDict[str(cat)] = p3.checkLog(conn,'week',userID,cat)
+            colorRows = p3.checkCatColor(conn,userID)
+            colorDict = {}
+            colorDict['all']='black'
+            if colorRows != None:
+                for eachRow in colorRows:
+                    colorDict[str(eachRow['name'])]=str(eachRow['color'])
+            return render_template('base_log_week.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap, colorDict=colorDict )
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
-    # else:
-    #     flash('something is wrong')
-    #     return render_template('base.html',allCats = allCats,database = DATABASE)
 
 @app.route('/month-logview/', methods = ['GET','POST'])
 def month_logview():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    dFormat = "MMM/YYYY"
-    intervalGap = 1
-    intType = 'month'
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            dFormat = "MMM/YYYY"
+            intervalGap = 1
+            intType = 'month'
 
-    logDict = {}
-    logDict['all'] = p3.checkLog('month',userID,'all')
-    for eachCat in allCats:
-        cat = eachCat['name']
+            logDict = {}
+            logDict['all'] = p3.checkLog(conn,'month',userID,'all')
+            for eachCat in allCats:
+                cat = eachCat['name']
 
-        catInfo = p3.checkLog('month',userID,cat)#list of dictionary
-        logDict[str(cat)] = p3.checkLog('month',userID,cat)
-    colorRows = p3.checkCatColor(userID)
-    colorDict = {}
-    colorDict['all']='black'
-    if colorRows != None:
-        for eachRow in colorRows:
-            colorDict[str(eachRow['name'])]=str(eachRow['color'])
-    return render_template('base_log_month.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap, colorDict=colorDict )
-
+                catInfo = p3.checkLog(conn,'month',userID,cat)#list of dictionary
+                logDict[str(cat)] = p3.checkLog(conn,'month',userID,cat)
+            colorRows = p3.checkCatColor(conn,userID)
+            colorDict = {}
+            colorDict['all']='black'
+            if colorRows != None:
+                for eachRow in colorRows:
+                    colorDict[str(eachRow['name'])]=str(eachRow['color'])
+            return render_template('base_log_month.html',allCats = allCats, database = DATABASE,logs = logDict,dFormat = dFormat,intervalGap = intervalGap, colorDict=colorDict )
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 
 
 @app.route('/day-checklist/', methods = ['GET','POST'])
 def day_checklist():
-    userID = session['userID']
-    allCats = p3.getCats(userID)
-    data = p3.rightPanelTask(userID)
-    return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelTask(conn,userID)
+            return render_template('base_task_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/week-checklist/', methods = ['GET','POST'])
 def week_checklist():
-    userID = session['userID']
-    allCats = p3.getCats(userID)
-    data = p3.rightPanelTask(userID)
-    return render_template('base_task_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelTask(conn,userID)
+            return render_template('base_task_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
-# rosie: please make inheretence for the week task views...
 @app.route('/month-checklist/', methods = ['GET','POST'])
 def month_checklist():
-    userID = session['userID']
-    allCats = p3.getCats(userID)
-    data = p3.rightPanelTask(userID)
-    return render_template('base_task_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelTask(conn,userID)
+            return render_template('base_task_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            flash('you are not currently logged in')
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/addEvent/',methods = ['POST'])
 def addEvent():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    eventName = request.form['eventName'] #should we change the name of this varchar
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
 
-    eventDate = request.form['eventDate']
-    start = request.form['startTime'] + ':00'
-    end = request.form['endTime'] + ':00'
+            if (request.form['eventName'] == "") or (request.form['eventDate'] == "") or (request.form['eventName'] == "") or (request.form['eventName'] == ""):
+                return jsonify({"error":"Empty inputs!"})
 
-    if eventName.split()!=[] and legalDate(eventDate):
-        p3.addEvent(userID,eventName,eventDate,start,end)
-    return render_template('base.html', allCats =  allCats, database = DATABASE)
+            startCheck = request.form['startTime'].split(':')
+            startCheckFormat = int(startCheck[0] + startCheck[1])
+            endCheck = request.form['endTime'].split(':')
+            endCheckFormat = int(endCheck[0] + endCheck[1])
+            if (endCheckFormat < startCheckFormat):
+                return jsonify({"error":"Time continuum violation!"})
+
+            eventName = request.form['eventName'] # we should change the name of this varchar
+            eventDate = request.form['eventDate']
+            start = request.form['startTime'] + ':00'
+            end = request.form['endTime'] + ':00'
+
+            if eventName.split()!=[] and legalDate(eventDate):
+                checkError = p3.addEvent(conn,userID,eventName,eventDate,start,end)
+                print checkError
+                if (checkError):
+                    return jsonify({"error": "Scheduling conflict!"})
+
+
+            dataStruct = p3.rightPanelEvent(conn,userID)
+            return jsonify(dataStruct)
+        else:
+            print "break1"
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        print "break2"
+        return render_template('login.html')
 
 @app.route('/day-event/', methods = ['GET','POST'])
 def day_event():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    data = p3.rightPanelEvent(userID)
-    return render_template('base_event_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelEvent(conn,userID)
+            return render_template('base_event_day.html',allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/week-event/', methods = ['GET','POST'])
 def week_event():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    data = p3.rightPanelEvent(userID)
-    return render_template('base_event_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID)
+            data = p3.rightPanelEvent(conn,userID)
+            return render_template('base_event_week.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
 @app.route('/month-event/', methods = ['GET','POST'])
 def month_event():
-    userID = session['userID']
-    allCats = p3.getCats(userID) #need to take care of userID
-    data = p3.rightPanelEvent(userID)
-    return render_template('base_event_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+    try:
+        conn = p3.getConnection()
+        if 'userID' in session:
+            userID = session['userID']
+            allCats = p3.getCats(conn,userID) #need to take care of userID
+            data = p3.rightPanelEvent(conn,userID)
+            return render_template('base_event_month.html', allCats =  allCats, dataStruct = data, database = DATABASE)
+        else:
+            return render_template('login.html')
+    except:
+        flash('Error! Redirecting to login page')
+        return render_template('login.html')
 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower()=='csv'
+@app.route('/upload/', methods=["POST"])
+def csvUpload():
+
+    if 'userID' in session:
+        userID = session['userID']
+        conn = p3.getConnection()
+        allCats = p3.getCats(conn,userID)
+        f = request.files['file']
+        if not f:
+            flash('No file is selected')
+            #return render_template('base.html',allCats=allCats)
+        if allowed_file(f.filename):
+            csv_input = pandas.read_csv(f,header=None)
+            data = csv_input.values
+
+            for eachRow in data:
+                try:
+                    if eachRow[0]=='log':
+                        cat = eachRow[1]
+                        hours = int(eachRow[3])
+                        rawDate= eachRow[2].split('/')
+                        logDate = rawDate[2]+'-'+rawDate[0]+'-'+rawDate[1]
+                        p3.addLog(conn,cat,hours,userID,logDate)
+                    elif eachRow[0] == 'event':
+                        eventName = eachRow[1]
+                        rawDate= eachRow[2].split('/')
+                        eventDate = rawDate[2]+'-'+rawDate[0]+'-'+rawDate[1]
+                        start = eachRow[3]+':00'
+                        end = eachRow[4]+':00'
+                        p3.addEvent(conn,userID,eventName,eventDate,start,end)
+                    elif eachRow[0]=='task':
+                        cat = eachRow[1]
+                        isFinished = int(eachRow[2])
+                        taskName = eachRow[3]
+                        rawStart= eachRow[4].split('/')
+                        start = rawStart[2]+'-'+rawStart[0]+'-'+rawStart[1]
+                        rawEnd= eachRow[5].split('/')
+                        end = rawEnd[2]+'-'+rawEnd[0]+'-'+rawEnd[1]
+                        if taskName.split()!=[] and legalDate(start) and legalDate(end):
+                            p3.addTask(conn,isFinished,userID,taskName,start,end,cat)
+                            checkID = p3.checkTaskID(conn,taskName,start,end)
+                            if checkID!=None:
+                                parID = checkID['taskID']
+                                numSubtask = len(eachRow)-6 #check number of subtasks
+                                print numSubtask
+                                if (numSubtask == 0):
+                                    p3.addSubtaskNull(conn,userID,parID)
+                                elif (numSubtask>0):
+                                    for i in range(6,len(eachRow)):
+                                        sub = eachRow[i]
+                                        if sub.split()!=[]:
+                                            startDT = dt.datetime.strptime(start,'%Y-%m-%d')
+                                            print startDT
+                                            endDT = dt.datetime.strptime(end,'%Y-%m-%d')
+                                            numDays = endDT - startDT
+                                            length = numDays/numSubtask
+                                            daysFromStart = (length*(i-5)).days
+                                            endFormatted = startDT + dt.timedelta(days = daysFromStart)
+                                            endFormat = str(endFormatted)[:-9]
+                                            p3.addTask(conn,isFinished,userID,sub,start,endFormat,cat)
+                                            print "subtaskAdded"
+                                            childID = p3.checkTaskID(conn,sub,start,endFormat)['taskID']
+                                            p3.addSubtask(conn,userID,parID,childID)
+                except:
+                    flash("invalid input")
+
+        return render_template('base.html',allCats = allCats)
+    else:
+        return render_template('login.html')
 
 
 if __name__ == '__main__':

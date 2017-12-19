@@ -1,45 +1,23 @@
-<!--
-     Because this inherits from base_task.html /in the middle/ of a <script> tag and document ready function,
-     the following two lines are commented out. I keep them here for easy uncommenting for my text editor
-     to properly color my code. Please let us know if this is bad form, and what alternatives there are if
-     it is.
--->
-<!-- <script>
-$(document).ready(function() { -->
+{% extends "base.html" %}
 
-{% extends "base_task.html" %}
+{% block rightPanel %}
 
-{% block customize %}
 
-  // for when page reloads upon form submission-- set current page information to return to this page
-  var location = (window.location.href).split('/')[3];
-  $("#catTickRedirect").val(location);
 
-  //only build the task if its due date is the same as the current date
-  function placeSubtasksHelper(taskDic, isParent){
-    if (taskDic["end"].toString() == date){
-      buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, "container2", "day");
-    }
-  }
+<script>
 
-  //process data structure of all tasks to find which dates to display
-  function placeSubtasks(dataStruct){
-    //Extract parent task from data structure for processing
-    for (j=0; j < dataStruct.length; j++ ){
-      taskDic = dataStruct[j][0];
-      placeSubtasksHelper(taskDic, true);
+$(document).ready(function() {
 
-      //Extract child subTasks from data structure for processing
-      for (i=0; i < dataStruct[j][1].length; i++){
-          taskDic = dataStruct[j][1][i];
-          if (Object.keys(taskDic).length != 0){
-          placeSubtasksHelper(taskDic, false);
-        }
-      }
-    }
-  }
+  var catChoiceDic = catCookies();
+  var date = findToday();
 
-  placeSubtasks(dataStruct);
+  //recieve the data structure containing task information from sql database
+  var data = "{{ dataStruct }}";
+  var data = data.replace(/&#39;/g,"\"");
+  var dataStruct = JSON.parse(data);
+
+  //see base_task.js
+  packagedTaskDay(dataStruct);
 
 });
 </script>

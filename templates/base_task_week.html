@@ -1,119 +1,22 @@
-<!--
-     Because this inherits from base_task.html /in the middle/ of a <script> tag and document ready function,
-     the following two lines are commented out. I keep them here for easy uncommenting for my text editor
-     to properly color my code. Please let us know if this is bad form, and what alternatives there are if
-     it is.
--->
-<!-- <script>
-$(document).ready(function() { -->
 
-{% extends "base_task.html" %}
+{% extends "base.html" %}
 
-{% block customize %}
+{% block rightPanel %}
 
-  // for when page reloads upon form submission-- set current page information to return to this page
-  var location = (window.location.href).split('/')[3];
-  $("#catTickRedirect").val(location);
+<script>
+$(document).ready(function() {
 
-  //Define a week as last Sunday to Saturday. Returns array containing date values
-  //formatted for comparison against SQL date values of tasks.
-  function defineWeek(){
-    var sunday = new Date();
-    sunday.setDate(sunday.getDate() - sunday.getDay());
+  var catChoiceDic = catCookies();
+  var date = findToday();
 
-    //add Sunday
-    dStr = sunday.toLocaleDateString().split('/');
-    week = [dStr[2] + ',' + dStr[0] + ',' + dStr[1]];
+  //recieve the data structure containing task information from sql database
+  var data = "{{ dataStruct }}";
+  var data = data.replace(/&#39;/g,"\"");
+  var dataStruct = JSON.parse(data);
 
-    //add rest of week
-    for (i = 1; i < 7; i++){
-      d = new Date(sunday.getTime() + 86400000*i); //robust against end-of-month changes. TODO: daylights savings
-      dStr = d.toLocaleDateString().split('/');
-      week.push(dStr[2] + ',' + dStr[0] + ',' + dStr[1] );
-    }
-    return week;
-  }
 
-  //formats week names for display in header
-  function formatWeekNames(){
-    var week = defineWeek();
-    var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; //TODO: consider making current day name bold
-    var displaynames = [];
-    for (i = 0; i < 7; i++){
-      var date = week[i].split(',');
-      displaynames.push(weeknames[i] + " " + date[1] + "/" + date[2]);
-    }
-    return displaynames
-  }
-
-  //create table to seperate days of week into columns, and contain tasks
-  $("#container2").append('<table style="width:100%;" id = "weekTasks" ></table>');
-
-  //put days of week into header row
-  $("#weekTasks").append('<tr id = "headers">  </tr>');
-  displaynames = formatWeekNames();
-  for (i = 0; i < 7; i++){
-    var header = '<th class="text-center">' + displaynames[i] + '</th>';
-    $("#headers").append(header);
-  }
-
-  //can format this with a loop later
-  //creates the row of table into which tasks will be placed
-  var week = defineWeek();
-  $("#weekTasks").append('<tr> <td id = ' + week[0].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[1].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[2].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[3].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[4].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[5].split(',')[2] + ' style="vertical-align:top" > </td>' +
-                              '<td id = ' + week[6].split(',')[2] + ' style="vertical-align:top" > </td>' +  '</tr>');
-
-  //for one task from the data structure, if the date on task matches a date to be displayed,
-  //create the task in the corresponding slot of the week table
-  function placeSubtasksHelper (j, dataStruct, date, selector){
-
-    //makes sure task's due date is the same as the relevant date
-    function placer(taskDic, isParent, selector){
-      if (taskDic["end"].toString() == date){
-        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "week");
-      }
-    }
-
-    //executes placing for both parent tasks and subtasks
-    taskDic = dataStruct[j][0];
-    placer(taskDic, true, selector);
-    for (i=0; i < dataStruct[j][1].length; i++){
-        taskDic = dataStruct[j][1][i];
-        if (Object.keys(taskDic).length != 0){
-          placer(taskDic,false, selector);
-        }
-    }
-  }
-
-  //iterate through all tasks and place them in the relevant week
-  function placeSubtasks(dataStruct){
-    var week = defineWeek();
-
-    //iterate through all tasks
-    for (j=0; j < dataStruct.length; j++ ){
-
-      placeSubtasksHelper(j, dataStruct, week[0], week[0].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[1], week[1].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[2], week[2].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[3], week[3].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[4], week[4].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[5], week[5].split(',')[2]);
-      placeSubtasksHelper(j, dataStruct, week[6], week[6].split(',')[2]);
-
-      //why is this not working?
-      // for (i=0; i < 7; i++){
-      //   //for each task, check whether it falls into any day of the week we're displaying
-      //   placeSubtasksHelper(j, dataStruct, week[i], week[i].split(',')[2]);
-      // }
-
-    }
-  }
-  placeSubtasks(dataStruct);
+  //see base_task.js  
+  packagedTaskWeek(dataStruct);
 
 });
 </script>

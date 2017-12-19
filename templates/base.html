@@ -24,6 +24,9 @@
     <!-- plugin for nicely designed dropdown selectors -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+        <script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
+    <!-- our own js -->
+    <script type="text/javascript" src="{{ url_for('static', filename='base_task.js') }}"></script>
 
 
     <style>
@@ -51,7 +54,7 @@
         text-align: center;
       }*/
 
-      .shit{
+      .horizontalSpacer{
         display: inline-block;
         text-align: left;
       }
@@ -119,29 +122,6 @@
       .spacer{
         margin-bottom: 2px;
       }
-      .button {
-          left:50px;
-          padding: 8px 25px;
-          font-size: 20px;
-          text-align: center;
-          cursor: pointer;
-          outline: none;
-          color: #fff;
-          background-color: #966F33;
-          border: none;
-          border-radius: 15px;
-          box-shadow: 0 9px #999;
-        }
-
-      .button:hover {background-color: #800000}
-
-      .button:active {
-        background-color: #800000;
-        box-shadow: 0 5px #666;
-        transform: translateY(4px);
-      }
-      /*.panel-body-month {
-        padding: 0 0 0 0;}*/
 
   </style>
 
@@ -149,15 +129,24 @@
 
   <script>
 
+
+
+
+
    // create cookies to save user's two drop-down value selections
    function timeChoose(){
      choice = $('#time').find(":selected").val();
      Cookies.set('timeChoice', choice);
+     // console.log(choice);
    }
 
    function dataChoose(){
      choice = $('#views').find(":selected").val();
      Cookies.set('dataChoice', choice);
+     // console.log(choice);
+
+     $('#catTickRedirect').val(choice);
+     // console.log($('#catTickRedirect').val());
    }
 
 
@@ -209,7 +198,7 @@
       ids.pop();
       ids.pop();
       Cookies.set('catChoice', ids);
-      $('#catTickId').val(JSON.stringify(ids));
+      // $('#catTickId').val(JSON.stringify(ids));
     }
 
 
@@ -218,14 +207,17 @@
 
     //retrieve the two saved dropdown values
     function loadDrops(){
+      Cookies.set('timeChoice', "day");
+      Cookies.set('dataChoice', "checklist");
       timeChoice = Cookies.get('timeChoice');
       dataChoice = Cookies.get('dataChoice');
-      if (timeChoice){
-       $("div.time_selector select").val(timeChoice);
-      }
-      if (dataChoice){
-       $("div.data_selector select").val(dataChoice);
-      }
+
+       // $("div.time_selector select").val(timeChoice);
+       // console.log("firstload: " + timeChoice);
+
+       // $("div.data_selector select").val(dataChoice);
+       // console.log("firstload: " + dataChoice);
+       $('#catTickRedirect').val(dataChoice);
      }
 
      loadDrops();
@@ -303,12 +295,12 @@
   </script>
 </head>
 
-
+<!-- note: some styling is done inline here. This will all be moved to a seperate stylesheet in next stage. -->
 <body>
 
 <div id = "header">
 
-  <div id = "headerleft"> <div class = "shit" style = "width: 14%;"> </div> DayByDay </div>
+  <div id = "headerleft"> <div class = "horizontalSpacer" style = "width: 14%;"> </div> DayByDay </div>
   <div id = "headerright" > {% block timeInfo %} {% endblock %} </div>
 
 </div>
@@ -321,12 +313,12 @@
     <br><p class = "spacer"></p>
 
       <!-- select view for time -->
-      <form method=POST action="{{ url_for('changeView') }}" style = "width: 100% !important; display: inline-block;">
+      <form id = "changeViewForm" style = "width: 100% !important; display: inline-block;">
 
-        <div class = "shit" style = "width: 10%;"> </div>
+        <div class = "horizontalSpacer" style = "width: 10%;"> </div>
         <!-- dropdown for user's time-view selection -->
         <div class = "form-group time_selector" style = "display: inline-block; width:80% !important;">
-          <select class = "form-control"  name="time" id="time" onchange="timeChoose(); this.form.submit();" >
+          <select class = "form-control"  name="time" id="time" onchange="timeChoose(); changeView();" >
           {% block timeSelect %}
             <option value="day">Day View</option>
             <option value="week">Week View</option>
@@ -336,10 +328,10 @@
         </div>
         <p class = "spacer"></p>
 
-        <div class = "shit" style = "width: 10%;"> </div>
+        <div class = "horizontalSpacer" style = "width: 10%;"> </div>
         <!-- dropdown for user's data-view selection -->
         <div class = "form-group data_selector" style = "display: inline-block; width:80% !important;">
-          <select class = "form-control" name="views" id="views" onchange="dataChoose(); this.form.submit();">
+          <select class = "form-control" name="views" id="views" onchange="dataChoose(); changeView();">
             <option value="checklist">Checklist View</option>
             <option value="events">Events View</option>
             <option value="log">Log View</option>
@@ -350,13 +342,13 @@
 
         <!-- load in user's categories -->
         {% block categories %}
-        <div class = "shit" style = "width: 10%;"> </div>
+        <div class = "horizontalSpacer" style = "width: 10%;"> </div>
         <div id = "categories" style = "display: inline-block;">
-          <form id = "catTickForm" method=POST action="{{ url_for('tickedCats') }}">
+          <form id = "catTickForm">
 
             <!-- catall checkbox -->
             <div class="pretty p-default p-curve">
-              <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); this.form.submit();" value="allCats"/>
+              <input type="checkbox" name="cat" id = "catall" onchange="checkCat(this,true); catTick();" value="allCats"/>
               <div class="state">
                 <label>All Categories</label>
               </div>
@@ -369,7 +361,7 @@
 
             <!-- generate checkbox for every category -->
             <div class="pretty p-default p-curve">
-                <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true); this.form.submit();" value="{{cat['name']}}" />
+                <input type="checkbox" class = "cat" name="cat" id = "cat{{cat['name']}}" onchange="checkCat(this,true); catTick();" value="{{cat['name']}}" />
                 <div class="state {{  d[cat['color']]  }} generatedCat">
                     <label><font color=" {{cat['color']}}  "> {{cat['name']}}  </font></label>
                 </div>
@@ -388,14 +380,14 @@
         <p class = "spacer"></p><br>
 
         <div>
-          <div class = "shit" style = "width: 10%;" >  </div>
+          <div class = "horizontalSpacer" style = "width: 10%;" >  </div>
 
           <!-- all '+ Feature' items within the Bootstrap accordion are contained here -->
           <div class = "addElements" style = "display: inline-block; width:80%; ">
           <div class="panel-group" id="accordion">
 
             <!-- + Category -->
-            <form class="panel panel-default" method=POST action="{{ url_for('addCat') }}">
+            <form id="addCategory" class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
                   <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" >+ Category</a>
@@ -420,13 +412,14 @@
 
                   <br><p class = "spacer"></p><br>
 
-                  <input class="btn btn-default" type="submit" value="Submit">
+                  <!-- <input id="addCategorySubmit" class="btn btn-default" type="submit" value="Submit"> -->
+                  <input id="addCategorySubmit" style="width:70%;" class="btn btn-default" value="Submit">
                 </div>
               </div>
             </form>
 
             <!-- + Task -->
-            <form class="panel panel-default" method=POST action="{{ url_for('addTask') }}">
+            <form id="addTask" class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
                   <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">+ Task</a>
@@ -437,7 +430,7 @@
                 <div class="panel-body">
 
                 <!-- category selector dropdown -->
-                <select class = "form-control" name="catOpt" id = "catOpt">
+                <select class = "form-control canUpdateCat" name="catOpt" id = "catOpt">
                  <option value="none">Choose Category</option>
                  {% block add_dropdown %}
                    {% for cat in allCats %}
@@ -473,13 +466,13 @@
                 <input class="btn btn-default" type="button" value="Add subtask" id = "add"><br>
                 <input type = "hidden" name = "num" id = "num" value = "0"><br>
 
-                <input class="btn btn-default" type="submit" value="Submit">
+                <input id="addTaskSubmit" style="width:70%;" class="btn btn-default" value="Submit">
                 </div>
               </div>
             </form>
 
             <!-- + Log Entry -->
-            <form class="panel panel-default" method=POST action="{{ url_for('addLog') }}">
+            <form id="addLog" class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
                   <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">+ Log Entry</a>
@@ -490,7 +483,7 @@
                 <div class="panel-body">
 
                   <!-- category selector dropdown -->
-                  <select class = "form-control" name="catName" id = "catOpt">
+                  <select class = "form-control canUpdateCat" name="catName" id = "catOpt">
                     <option value="none">Choose Category</option>
                     {% for cat in allCats %}
                       <option value="{{cat['name']}}"> {{cat['name']}} </option>
@@ -508,13 +501,13 @@
                       </span>
                   </div><br>
 
-                  <input class="btn btn-default" type="submit" value="Submit">
+                  <input id="addLogSubmit" style="width:70%;" class="btn btn-default" value="Submit">
                 </div>
               </div>
             </form>
 
             <!-- + Event -->
-            <form class="panel panel-default" method=POST action="{{ url_for('addEvent') }}">
+            <form id="addEvent" class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
                   <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">+ Event</a>
@@ -551,23 +544,52 @@
                       </span>
                   </div><br>
 
-                  <input class="btn btn-default" type="submit" value="Submit">
+                  <input id="addEventSubmit" class="btn btn-default" style="width:70%;" value="Submit">
 
 
                 </div>
               </div>
             </form>
 
-            <p class = "spacer"></p>
+            <!-- + csv Upload -->
+            <form id = "uploadFile" class="panel panel-default" method=POST action="{{ url_for('csvUpload') }}" enctype = "multipart/form-data">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">+ CSV Upload</a>
+                </h4>
+              </div>
 
-            <div class = "spacer123" style = "width: 10%;"> </div>
-            <div>
-            <form action="{{ url_for('logout') }}" method="post">
-                <button class = "button" name="logout" type="submit">Log me Out!</button>
+              <div id="collapseFive" class="panel-collapse collapse">
+                <div class="panel-body">
+
+
+
+                 <input type = "file" name = "file">
+
+                  <input id = "uploadSubmit" class="btn btn-default" type="submit" value="Upload">
+
+
+                </div>
+              </div>
+            </form>
+
+
+
+
+
+          </div>
+          </div>
+          <!-- log out button -->
+          <div>
+            <!-- <div class = "horizontalSpacer" style = "width: 30%;"> </div> -->
+            <form action="{{ url_for('logout') }}" method=POST style = "text-align:center;">
+                  <button class = "btn btn-default" name="logout" type="submit">Log Out</button>
             </form>
           </div>
-          </div>
-          </div>
+
+          <br><p class = "spacer"></p>
+          <div id="pulseMessages" style="display: none; width: 60%; margin: auto; color: #418ACA; text-align:center; border-radius: 5px; border: 1px solid #418ACA;">   </div>
+
         </div>
   </div>
 
@@ -581,16 +603,6 @@
   </div>
 
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <script>
-        var messages = {{ messages | safe }};
-        for (var i=0; i<messages.length; i++) {
-          alert(messages[i]);
-        }
-      </script>
-    {% endif %}
-  {% endwith %}
 
 </body>
 </html>

@@ -6,7 +6,7 @@
 
 {% block rightPanel %}
 	<script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
-	<div id="chartContainer" style="height: 90%; width: 85%;"></div>
+	<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 	<script type="text/javascript">
 //get the user's choices from cookies and convert from string to data structure
 
@@ -21,14 +21,14 @@
 		catChoiceDic[catChoiceObj[i][0].toString()] = catChoiceObj[i][1];
 	}
 
-	var catList = [];
+	var catList = [];//catList is a list of selected categories
 	for (k in catChoiceDic){
 		if (catChoiceDic[k]==true){
 			catList.push(k);
 		}
 	}
 
-
+//a helper function to clean the raw data such that it's meaningful for the API
 	function translatePoints(raw){
 		var result = [];
 		for (i = 0; i < raw.length; i++){
@@ -38,6 +38,7 @@
 		return result;
 	}
 
+//a helper function which pushes the dataPoints of a new category to the existing data
 	function makeData(dataList,catName,dataPoints,color){
 		var eachData = {
 					type: "line",
@@ -48,12 +49,11 @@
 					color: '#'+color,//"#F08080",
 					dataPoints : dataPoints
 				};
-		console.log('color');
-		console.log(color);
 		dataList.push(eachData);
 
 	}
 
+//load the API
 	function loadLog(data,viewFormat,gap,intType){
 		window.onload = function () {
 			var chart = new CanvasJS.Chart("chartContainer", {
@@ -81,18 +81,7 @@
 					verticalAlign: "center",
 					horizontalAlign: "right"
 				},
-				data:data,
-				// data: [//can also take a parameter to track different tasks
-				// {
-				// 	type: "line",
-				// 	showInLegend: true,
-				// 	lineThickness: 2,
-				// 	name: "Accumulative Hours Spent",
-				// 	markerType: "square",
-				// 	color: "#F08080",
-				// 	dataPoints : allLog
-				// }
-				// ],
+				data:data,//data is prepared by the helper function
 				legend: {
 					cursor: "pointer",
 					itemclick: function (e) {
@@ -109,37 +98,31 @@
 
 			chart.render();
 		}}
-		//allLogRec = {{logs}};//our dictionary
-		var data = "{{logs}}";
+		//convert python dictionary to javascript dictionary
+		var data = "{{logs}}";//{category:[[yyyy,mm,dd,hours]]}
 		var data = data.replace(/&#39;/g,"\"");
 		var allLogRec = JSON.parse(data);
 
-		var color = "{{colorDict}}"
-		console.log(color);
+		var color = "{{colorDict}}"//{category:color}
+
 		var color = color.replace(/&#39;/g,"\"");
 		var colorDic = JSON.parse(color);
-		console.log('colorDic')
-		console.log(colorDic);
+
 		dataRec = [];
 		intervalGap = {{intervalGap}};
 		intType = "{{intType}}";
 		dateFormat = "{{dFormat}}";
 
 
-		for (var j = 0 ; j <catList.length; j++){
-
-			var actualCat = catList[j].substring(3);
+		for (var j = 0 ; j <catList.length; j++){//construct data for each category
+			var actualCat = catList[j].substring(3);//the previous form is 'catXXX', and we are only interested in XXX
       if (actualCat in allLogRec){
-			var dataPoints = translatePoints(allLogRec[actualCat]);
-			console.log(colorDic[actualCat]);
-			makeData(dataRec,actualCat,dataPoints,colorDic[actualCat]);}
+				var dataPoints = translatePoints(allLogRec[actualCat]);//prepare data
+				makeData(dataRec,actualCat,dataPoints,colorDic[actualCat]);//append it to our current data list
+			}
 
 		}
-		// for (i = 0; i < allLogRec.length; i++){
-		// 	rec = allLogRec[i];
-		// 	dataRec.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
-		// }
-		loadLog(dataRec,dateFormat,intervalGap,intType);
+		loadLog(dataRec,dateFormat,intervalGap,intType);//function to call the graph
 
 
 

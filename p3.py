@@ -2,32 +2,24 @@ import dbconn2
 import MySQLdb
 import os
 from flask import (Flask, render_template, url_for, request, flash)
+from DSN import *
+# import id
 
-DSN  = { 'host': 'localhost',
-                   'user' :  'czheng',
-                   'passwd' :'MkC8oFMvMUTXc9O',
-                   'db': 'czheng_db'}
-DATABASE = 'czheng_db'
+def getConnection():
+    dsn = rpyktel_dsn
+    conn = dbconn2.connect(dsn)
+    return conn
 
-# DSN  = { 'host': 'localhost',
-#                    'user' :  'rpyktel',
-#                    'passwd' :'G2O2HUprzpi6xUl',
-#                    'db': 'rpyktel_db'}
-# DATABASE = 'rpyktel_db'
-
-def cursor(database=DATABASE):
-    DSN['db'] = database
-    conn = dbconn2.connect(DSN)
-    return conn.cursor(MySQLdb.cursors.DictCursor)
-
-def checkUser(username,passwd):
-    curs = cursor(DATABASE)
+def checkUser(conn,username,passwd):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print 'connected'
     curs.execute('select * from user where username = %s and psswd = %s;',(username,passwd,))
     row = curs.fetchone()
     return row
 
-def checkUsername(username):
-    curs = cursor(DATABASE)
+def checkUsername(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print 'connected'
     curs.execute('select * from user where username = %s;',(username,))#check if the username is in the database already
     row = curs.fetchone()
     if row == None:
@@ -35,24 +27,26 @@ def checkUsername(username):
     else:
         return False
 
-def createUser(username,passwd):
-    curs=cursor(DATABASE)
+def createUser(conn,username,passwd):
+    curs  = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('insert into user (username,psswd) values (%s,%s);',(username,passwd,))
 
-
-def getCatColors(userID):
-    curs = cursor(DATABASE)
+def getCatColors(conn,userID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select name, color from category where userID = %s;',(userID,))
     colorsDict = curs.fetchall()
     d = {}
     for obj in colorsDict:
         d[str(obj['name'])] = str(obj['color'])
+    # print d
     return d
 
-
-def rightPanelTask(userID):
-    getColors = getCatColors(userID)
-    curs = cursor(DATABASE)
+# create data structure containing information on all of the user's tasks
+def rightPanelTask(conn,userID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    getColors = getCatColors(conn,userID)
+    # print 'getCOlors'
+    # print getColors
     curs.execute('select distinct parentTaskID, subTaskID from taskList where userId = %s;',(userID,))
     buildAssociation = curs.fetchall()
     finalData = []
@@ -67,9 +61,9 @@ def rightPanelTask(userID):
             taskDic[parentTask] = [subTask]
     for obj in taskDic.keys():
         taskHolder = []
-        curs1 = cursor(DATABASE)
-        curs1.execute('select isFinished, taskName, taskID, start, end, name from task where taskID = %s',(obj,))
-        parent = curs1.fetchall()
+        #curs1 = cursor(DATABASE)
+        curs.execute('select isFinished, taskName, taskID, start, end, name from task where taskID = %s',(obj,))
+        parent = curs.fetchall()
 
         parentDic = {'name': str(parent[0]['taskName']),
                     'isFinished': parent[0]['isFinished'],
@@ -81,11 +75,11 @@ def rightPanelTask(userID):
 
         subDics = []
         for subID in taskDic[obj]:
-            curs2 = cursor(DATABASE)
-            curs2.execute('select taskName, isFinished, taskID, end, name from task where taskID = %s;',(subID,))
-            subTask = curs2.fetchall()
+            #curs2 = cursor(DATABASE)
+            curs.execute('select taskName, isFinished, taskID, end, name from task where taskID = %s;',(subID,))
+            subTask = curs.fetchall()
 
-            if (curs2.rowcount == 0):
+            if (curs.rowcount == 0):
                 subDic = {}
             else:
                 subDic = {'name': str(subTask[0]['taskName']),
@@ -110,8 +104,8 @@ def buildDropdown(timeSelection,dataSelection):
     return data
 
 
-def getCats(userID):#check this part, need to check for none value
-    curs = cursor(DATABASE)
+def getCats(conn,userID):#check this part, need to check for none value
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from category where userID = %s;',(userID,))
     allCats = curs.fetchall()
     if allCats!=None:
@@ -120,19 +114,18 @@ def getCats(userID):#check this part, need to check for none value
     else:
         return []
 
-def addCat(name,color,userID):
-    curs = cursor(DATABASE)
+def addCat(conn,name,color,userID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('insert into category(name, color,userID) values (%s,%s,%s);',(name, color,userID,))
         print "successful insert"
-        flash("Inserted " + name + " successfully!")
     except:
-        print "todo"
-        print "did not work"
+        return "error"
 
 
-def addTask(isFinished,userID,taskName,start,end,cat):
-    curs = cursor(DATABASE)
+def addTask(conn,isFinished,userID,taskName,start,end,cat):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print "at addTask"
     try:
         curs.execute('select * from task where taskName = %s and start = %s and end = %s and userID = %s;',(taskName,start,end,userID,))
         row = curs.fetchone()
@@ -142,11 +135,14 @@ def addTask(isFinished,userID,taskName,start,end,cat):
             flash ("Inserted "+taskName +" successfully!")
         else:
             flash ("task existed in the database")
+            return {"error":"Duplicate task!"}
     except:
         flash("check your input!")
+        print "empty inputs"
 
-def deleteSubtask(taskID):
-    curs = cursor(DATABASE)
+
+def deleteSubtask(conn,taskID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from taskList where parentTaskID = %s;',(taskID,))
     rows = curs.fetchall()
     if len(rows)!=0:
@@ -160,8 +156,8 @@ def deleteSubtask(taskID):
         curs.execute('delete from task where taskID  = %s;',(taskID,))
 
 
-def deleteTask(userID,taskName,start,end,cat):
-    curs = cursor(DATABASE)
+def deleteTask(conn,userID,taskName,start,end,cat):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     taskID = checkTaskID(taskName,start,end)
     if taskID is not None:
         deleteSubtask(taskID['taskID'])
@@ -169,8 +165,8 @@ def deleteTask(userID,taskName,start,end,cat):
     else:
         flash('Such task does not exist')
 
-def checkTaskID(taskName,start,end):
-    curs = cursor(DATABASE)
+def checkTaskID(conn,taskName,start,end):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         #curs.execute('insert into task(isFinished,userID,taskName,start,end) values ("{0}","{1}","{2}","{3}","{4}");'.format(isFinished,userID,taskName,start,end))
         curs.execute('select * from task where taskName = %s and start = %s and end = %s;',(taskName,start,end,))
@@ -180,35 +176,35 @@ def checkTaskID(taskName,start,end):
         flash('please check your input')
         print "to do: not working"
 
-def tickBox(taskID):
-    curs = cursor(DATABASE)
+def tickBox(conn,taskID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select isFinished from task where taskID =' + taskID[4:])
     row = curs.fetchone()
     isFin = 1
     if (row['isFinished']):
         isFin = 0
 
-    curs2 = cursor(DATABASE)
+    #curs2 = conn.cursor(MySQLdb.cursors.DictCursor)
     print 'update task set isFinished=' + str(isFin) + ' where taskID = ' + taskID[4:] + ';'
     curs.execute('update task set isFinished=' + str(isFin) + ' where taskID = ' + taskID[4:] + ';')
 
 
-def addSubtask(userID,parent,child):#this needs to be an id
-    curs = cursor(DATABASE)
+def addSubtask(conn,userID,parent,child):#this needs to be an id
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,%s);',(userID,parent,child,))
 
-def addSubtaskNull(userID,parent):#this needs to be an id
-    curs = cursor(DATABASE)
+def addSubtaskNull(conn,userID,parent):#this needs to be an id
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('insert into taskList (userID,parentTaskID,subTaskID) values (%s,%s,NULL);',(userID,parent,))
 
-def checkCatColor(userID):#check all colors
-    curs = cursor(DATABASE)
+def checkCatColor(conn,userID):#check all colors
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from category where userID = %s;',(userID,))
     rows = curs.fetchall()
     return rows
 
-def addLog(cat,hours,userID,taskDate):
-    curs = cursor(DATABASE)
+def addLog(conn,cat,hours,userID,taskDate):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from category where name = %s;',(cat,))
     row = curs.fetchone()
     if row != None:
@@ -216,7 +212,7 @@ def addLog(cat,hours,userID,taskDate):
         row = curs.fetchone()
         if row == None:
             curs.execute('insert into logEntry values (%s,%s,%s,%s);',(cat,hours,userID,taskDate,))
-            flash('log has been entered')
+            # flash('log has been entered')
         else:
             #existingHour = row['hours']
             curs.execute('update logEntry set hours = hours + %s where name = %s and taskDate = %s and userID = %s;',(hours,cat,taskDate,userID,))
@@ -225,8 +221,8 @@ def addLog(cat,hours,userID,taskDate):
         flash('please input an existing category')
 
 
-def checkLog(logType,userID,cat):#given logType and category, returns [[yyyy,mm,dd,hours]]
-    curs = cursor(DATABASE)
+def checkLog(conn,logType,userID,cat):#given logType and category, returns [[yyyy,mm,dd,hours]]
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     #finalResult = []
     if cat == 'all':
         if logType == 'day':
@@ -255,10 +251,44 @@ def checkLog(logType,userID,cat):#given logType and category, returns [[yyyy,mm,
                 result.append(cleanRec)
     return result
 
+def allLog(conn,userID,allCats):
 
+    print "at allLog"
 
-def addEvent(userID,eventName,eventDate,start,end):
-    curs = cursor(DATABASE)
+    logDictDay = {}
+    logDictDay['all'] = checkLog(conn,'day',userID,'all')
+    for eachCat in allCats:
+        cat = eachCat['name']
+
+        catInfo = checkLog(conn,'day',userID,cat)#list of dictionary
+        logDictDay[str(cat)] = checkLog(conn,'day',userID,cat)
+
+    logDictWeek = {}
+    logDictWeek['all'] = checkLog(conn,'week',userID,'all')
+    for eachCat in allCats:
+        cat = eachCat['name']
+
+        catInfo = checkLog(conn,'week',userID,cat)#list of dictionary
+        logDictWeek[str(cat)] = checkLog(conn,'week',userID,cat)
+
+    logDictMonth = {}
+    logDictMonth['all'] = checkLog(conn,'month',userID,'all')
+    for eachCat in allCats:
+        cat = eachCat['name']
+
+        catInfo = checkLog(conn,'month',userID,cat)#list of dictionary
+        logDictMonth[str(cat)] = checkLog(conn,'month',userID,cat)
+
+    colorRows = checkCatColor(conn,userID)
+    colorDict = {}
+    colorDict['all']='000000'
+    if colorRows != None:
+        for eachRow in colorRows:
+            colorDict[str(eachRow['name'])]=str(eachRow['color'])
+    return [logDictDay,logDictWeek,logDictMonth,colorDict]
+
+def addEvent(conn,userID,eventName,eventDate,start,end):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from event where eventDate = %s and (%s between start and end or %s between start and end);',(eventDate,start,end,))
     row = curs.fetchone()
     if row == None:
@@ -266,7 +296,9 @@ def addEvent(userID,eventName,eventDate,start,end):
         print 'successfullt insert'
         flash ("Inserted "+eventName +" successfully!")
     else:
+        print "conflict!"
         flash('there seems to be a scheduling conflict')
+        return "error"
     # try:
     #     #check if there exists any preexisting event
     #     curs.execute('select * from event where eventDate = %s where %s bewteen start and end or %s bewteen start and end;',(eventDate,start,end,))
@@ -281,9 +313,8 @@ def addEvent(userID,eventName,eventDate,start,end):
     #     flash("check your input!")
 
 
-def rightPanelEvent(userID):
-
-    curs = cursor(DATABASE)
+def rightPanelEvent(conn,   userID):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from event where userId = %s;',(userID,))
     buildAssociation = curs.fetchall()
     finalData = []

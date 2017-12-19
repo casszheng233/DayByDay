@@ -1,134 +1,20 @@
-<!--
-     Because this inherits from base_task.html /in the middle/ of a <script> tag and document ready function,
-     the following two lines are commented out. I keep them here for easy uncommenting for my text editor
-     to properly color my code. Please let us know if this is bad form, and what alternatives there are if
-     it is.
--->
-<--<script>
-$(document).ready(function() {-->
 
-{% extends "base_task.html" %}
+{% extends "base.html" %}
 
-{% block customize %}
+{% block rightPanel %}
+<script>
+$(document).ready(function() {
 
-  // for when page reloads upon form submission-- set current page information to return to this page
-  var location = (window.location.href).split('/')[3];
-  $("#catTickRedirect").val(location);
+  var catChoiceDic = catCookies();
+  var date = findToday();
 
-  //create table to seperate days of week into columns, and contain tasks
-  $("#container2").append('<table style="width:100%; table-layout:fixed; border-collapse: collapse;" id = "weekTasks" ></table>')
+  //recieve the data structure containing task information from sql database
+  var data = "{{ dataStruct }}";
+  var data = data.replace(/&#39;/g,"\"");
+  var dataStruct = JSON.parse(data);
 
-  //put names of weekdays into header row
-  $("#weekTasks").append('<tr id = headers>   </tr>');
-  var weeknames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  for (i = 0; i < 7; i++){
-    var header = '<th class = "text-center" style = "width: 10%;" >' + weeknames[i] + '</th>';
-    $("#headers").append(header);
-  }``
-
-  // returns an array of date objects of the 1st of the month, the 8th of the month, etc adding 7 days
-  // each time until reaching end of month
-  function defineMonth(){
-    var date = new Date();
-    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-    var weeks = [firstDay];
-    for (i = 1; i < 6; i++){
-      d = new Date(firstDay.getTime() + 7*86400000*i); //robust against end-of-month changes. TODO: daylights savings
-      weeks.push(d);
-    }
-    return weeks;
-  }
-
-  //given a date, returns array of current week's dates in format YYYY,MM,DD for comparison to SQL values
-  //Defines a week as last Sunday to Saturday.
-  function defineWeek(date){
-    var sunday = date;
-    sunday.setDate(sunday.getDate() - sunday.getDay());
-
-    dStr = sunday.toLocaleDateString().split('/');
-    week = [dStr[2] + ',' + dStr[0] + ',' + dStr[1]];
-
-    for (i = 1; i < 7; i++){
-      d = new Date(sunday.getTime() + 86400000*i); //robust against end-of-month changes
-      dStr = d.toLocaleDateString().split('/');
-      week.push(dStr[2] + ',' + dStr[0] + ',' + dStr[1] );
-    }
-    return week;
-  }
-
-  //formats week names for display in header
-  function formatWeekNames(date){
-    var week = defineWeek(date);
-    var displaynames = [];
-
-    for (i = 0; i < 7; i++){
-      var date = week[i].split(',');
-      displaynames.push(date[1] + "/" + date[2]);
-    }
-    return displaynames
-  }
-
-  //for one task from the data structure, if the date on task matches a date to be displayed,
-  //create the task in the corresponding slot of the week table
-  function placeSubtasksHelper (j, dataStruct, date, selector){
-
-    //makes sure task's due date is the same as the relevant date, and builds task
-    function placer(taskDic, isParent, selector){
-      if (taskDic["end"].toString() == date){
-        var hi = 0;
-        buildTask(taskDic["taskID"], taskDic["catColor"], taskDic["cat"], taskDic["name"], taskDic["isFinished"].toString(), isParent, selector, "month");
-      }
-    }
-
-    //executes placing for both parent tasks and subtasks
-    taskDic = dataStruct[j][0];
-    placer(taskDic, true, selector);
-    for (i=0; i < dataStruct[j][1].length; i++){
-        taskDic = dataStruct[j][1][i];
-        if (Object.keys(taskDic).length != 0){
-          placer(taskDic,false, selector);
-        }
-    }
-  }
-
-  // creates one week as a row of our table
-  function oneWeek (date){
-    var displayNames = formatWeekNames(date);
-    var current = new Date();
-    var month = current.getMonth() + 1;
-    var onlyCurrentMonth = displayNames.map((date) => { if (date.split('/')[0] != month){ return ' '; } else { return ('id = ' + date); }});
-    displayNames = onlyCurrentMonth;
-
-    //console.log(displayNames);
-    console.log(displayNames[0]); //really jank please fix
-    $("#weekTasks").append('<tr style ="height:130px;"> <td class="text-center" ' + displayNames[0].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[0].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[1].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[1].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[2].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[2].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[3].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[3].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[4].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[4].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[5].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[5].slice(-5) + ' </td>' +
-                                '<td class="text-center" ' + displayNames[6].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[6].slice(-5) + ' </td>' +  '</tr>');
-
-    var week = defineWeek(date);
-    for (j=0; j < dataStruct.length; j++ ){
-      for (w = 0; w < 7; w++){
-        placeSubtasksHelper(j, dataStruct, week[w], week[w].split(',')[1] + "_" + week[w].split(',')[2]);
-        // console.log(week[w].split(',')[1] + "_" + week[w].split(',')[2]);
-
-      }
-    }
-  }
-
-  // create the weeks of the month
-  var aWeek = defineMonth();
-  oneWeek(aWeek[0]);
-  oneWeek(aWeek[1]);
-  oneWeek(aWeek[2]);
-  oneWeek(aWeek[3]);
-  oneWeek(aWeek[4]);
-  oneWeek(aWeek[5]);
+  //see base_task.js
+  packagedTaskMonth(dataStruct);
 
 });
 </script>
