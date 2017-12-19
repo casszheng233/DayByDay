@@ -8,6 +8,8 @@ import p3
 import datetime as dt
 import hashlib
 from DSN import *
+import pandas
+from werkzeug import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "whatever"
@@ -70,20 +72,6 @@ def logout():
     session.pop('userID',None)
     return redirect(url_for('initialPage'))
 
-# helper : check if the input date is legal or not
-def legalDate(inputDate):
-    s = inputDate.split('-')
-    try:
-        if len(s)==3:
-            yr = int(s[0])
-            month = int(s[1])
-            day = int(s[2])
-            return (0<month and month<13 and 0<day and day<32)
-        else:
-            return False
-    except:
-        return False
-
 #create new category: catName, catColor
 @app.route('/addCat/', methods = ['POST'])
 def addCat():
@@ -125,7 +113,7 @@ def addTask():
             cat = request.form['catOpt']
 
             try:
-                if taskName.split()!=[] and legalDate(start) and legalDate(end):
+                if taskName.split()!=[] and p3.legaldate(start) and p3.legaldate(end):
                     checkError = p3.addTask(conn,isFinished,userID,taskName,start,end,cat)
                     if (checkError):
                         return jsonify({"error":"Duplicate task!"})
@@ -203,8 +191,6 @@ def tickTask():
                 value = request.form['taskCheck']
                 redirectVal = request.form['timeSelector']
                 p3.tickBox(conn,value)
-                # print redirectVal
-            # return redirect(url_for(redirectVal))
             return json.dumps({'status':'OK','user':value,'pass':redirectVal});
         else:
             return render_template('login.html')
@@ -218,7 +204,6 @@ def tickedCats():
     if 'userID' in session:
         userID = session['userID']
         if request.method == 'POST':
-            # value = request.form['catHidden']
             dataSelection = request.form['catHiddenRedirect']
 
             if (dataSelection == "checklist"):
@@ -231,69 +216,7 @@ def tickedCats():
                 allCats = p3.getCats(conn,userID)
                 dataStruct = p3.allLog(conn,userID,allCats)
                 return jsonify(dataStruct)
-
-    return jsonify({"error":"oh my god2"})
-
-
-
-# @app.route('/tickedCats/', methods = ['GET', 'POST'])
-# def tickedCats():
-#     try:
-#         conn = p3.getConnection()
-#         if 'userID' in session:
-#             print "userID is in session"
-#             if request.method == 'POST':
-#                 print "it's a post"
-#                 print "big cocks"
-#                 # value = request.form['catHidden']
-#                 dataSelection = request.form['catHiddenRedirect']
-#
-#                 # print value
-#                 print dataSelection
-#
-#                 if (dataSelection == "checklist"):
-#                     dataStruct = p3.rightPanelTask(conn,userID)
-#                     return jsonify(dataStruct)
-#                 # if (dataSelection == "events"):
-#                 #     dataStruct = p3.rightPanelEvent(conn,userID)
-#                 #     return jsonify(dataStruct)
-#                 # if (dataSelection == "log"):
-#                 #     print "TODO"
-#
-#                 return jsonify({"error":"oh my god1"})
-#
-#                 # timeSelection = redir.split('-')[0]
-#                 # dataSelection = redir.split('-')[1]
-#
-#                 # print timeSelection
-#                 # print dataSelection
-#
-#                 # if (dataSelection == "checklist"):
-#                 #     dataStruct = p3.rightPanelTask(conn,userID)
-#                 #     return jsonify(dataStruct)
-#                 # if (dataSelection == "events"):
-#                 #     dataStruct = p3.rightPanelEvent(conn,userID)
-#                 #     return jsonify(dataStruct)
-#                 # if (dataSelection == "log"):
-#                 #     print "TODO"
-#
-#             # redirDic = {"day-checklist":"day_checklist","week-checklist":"week_checklist","month-checklist":"month_checklist",
-#             # "day-event":"day_event","week-event":"week_event","month-event":"month_event",
-#             # "day-logview":"day_logview","week-logview":"week_logview","month-logview":"month_logview"}
-#             # if request.method == 'POST':
-#             #     value = request.form['catHidden']
-#             #     redir = request.form['catHiddenRedirect']
-#
-#             # return redirect(url_for(redirDic[redir]))
-#             return jsonify({"error":"oh my god2"})
-#         else:
-#             print "something happened1"
-#             return render_template('login.html')
-#     except:
-#         flash('Error! Redirecting to login page')
-#         print "something happened2"
-#         return render_template('login.html')
-
+    return jsonify({"error":"Please refresh!"})
 
 
 #input a new log
@@ -308,56 +231,18 @@ def addLog():
             hours = request.form['hour']
             taskDate = request.form['taskDate']
             try:
-                if legalDate(taskDate) and int(hours)>0: #check if input is legal
+                if p3.legaldate(taskDate) and int(hours)>0: #check if input is legal
                     p3.addLog(conn,cat,hours,userID,taskDate)
                 else:
                     # print "check input!!!"
                     flash('check your input')
                     return jsonify({"error":"Empty inputs!"})
-                # return redirect(url_for('day_logview'))
-                #data = {"cat": cat,"hour":hours,"taskDate":taskDate}
 
-                # logDictDay = {}
-                # logDictDay['all'] = p3.checkLog(conn,'day',userID,'all')
-                # for eachCat in allCats:
-                #     cat = eachCat['name']
-                #
-                #     catInfo = p3.checkLog(conn,'day',userID,cat)#list of dictionary
-                #     logDictDay[str(cat)] = p3.checkLog(conn,'day',userID,cat)
-                #
-                #
-                # logDictWeek = {}
-                # logDictWeek['all'] = p3.checkLog(conn,'week',userID,'all')
-                # for eachCat in allCats:
-                #     cat = eachCat['name']
-                #
-                #     catInfo = p3.checkLog(conn,'week',userID,cat)#list of dictionary
-                #     logDictWeek[str(cat)] = p3.checkLog(conn,'week',userID,cat)
-                #
-                # logDictMonth = {}
-                # logDictMonth['all'] = p3.checkLog(conn,'month',userID,'all')
-                # for eachCat in allCats:
-                #     cat = eachCat['name']
-                #
-                #     catInfo = p3.checkLog(conn,'month',userID,cat)#list of dictionary
-                #     logDictMonth[str(cat)] = p3.checkLog(conn,'month',userID,cat)
-                #
-                # colorRows = p3.checkCatColor(conn,userID)
-                # colorDict = {}
-                # colorDict['all']='000000'
-                # if colorRows != None:
-                #     for eachRow in colorRows:
-                #         colorDict[str(eachRow['name'])]=str(eachRow['color'])
-
-                #dataDay = p3.checkLog(conn,'day','userID')
                 dataStruct = p3.allLog(conn,userID,allCats)
                 return jsonify(dataStruct)
 
-                # return jsonify([logDictDay,logDictWeek, logDictMonth, colorDict])
             except:
                 flash('check your input')
-                # print("very wrong!!!!")
-                # return redirect(url_for('login.html'))
                 return jsonify({"error":"Not a valid number!"})
         else:
             return render_template('login.html')
@@ -388,40 +273,6 @@ def changeView():
                 print dataStruct
                 return jsonify(dataStruct)
 
-
-
-
-
-            #routing for log
-            # if (timeSelection == "day" and dataSelection == "log"):
-            #     print "day log"
-            #     return redirect(url_for('day_logview'))
-            # elif (timeSelection == "week" and dataSelection == "log"):
-            #     print "week log"
-            #     return redirect(url_for('week_logview'))
-            # elif (timeSelection == "month" and dataSelection == "log"):
-            #     print "month log"
-            #     return redirect(url_for('month_logview'))
-            #
-            # # routing for checklist
-            # if (timeSelection == "day" and dataSelection == "checklist"):
-            #     return redirect(url_for('day_checklist'))
-            # if (timeSelection == "week" and dataSelection == "checklist"):
-            #     return redirect(url_for('week_checklist'))
-            # if (timeSelection == "month" and dataSelection == "checklist"):
-            #     return redirect(url_for('month_checklist'))
-            #
-            # #routing for events
-            # if (timeSelection == "day" and dataSelection == "events"):
-            #     return redirect(url_for('day_event'))
-            # if (timeSelection == "week" and dataSelection == "events"):
-            #     return redirect(url_for('week_event'))
-            # if (timeSelection == "month" and dataSelection == "events"):
-            #     return redirect(url_for('month_event'))
-            # else:
-            #     rightpanel = "View: " + str(timeSelection) + " " + str(dataSelection)
-            #     dropdowns = p3.buildDropdown(timeSelection,dataSelection)
-            #     return render_template('base.html', allCats =  allCats, timeSelect1 = dropdowns, rightPanel = rightpanel, database = DATABASE)
         else:
             return render_template('login.html')
     except:
@@ -593,7 +444,7 @@ def addEvent():
             start = request.form['startTime'] + ':00'
             end = request.form['endTime'] + ':00'
 
-            if eventName.split()!=[] and legalDate(eventDate):
+            if eventName.split()!=[] and p3.legaldate(eventDate):
                 checkError = p3.addEvent(conn,userID,eventName,eventDate,start,end)
                 print checkError
                 if (checkError):
@@ -669,7 +520,8 @@ def csvUpload():
         if not f:
             flash('No file is selected')
             #return render_template('base.html',allCats=allCats)
-        if allowed_file(f.filename):
+        fn = secure_filename(f.filename)
+        if allowed_file(fn):
             csv_input = pandas.read_csv(f,header=None)
             data = csv_input.values
 
@@ -696,7 +548,7 @@ def csvUpload():
                         start = rawStart[2]+'-'+rawStart[0]+'-'+rawStart[1]
                         rawEnd= eachRow[5].split('/')
                         end = rawEnd[2]+'-'+rawEnd[0]+'-'+rawEnd[1]
-                        if taskName.split()!=[] and legalDate(start) and legalDate(end):
+                        if taskName.split()!=[] and p3.legaldate(start) and p3.legaldate(end):
                             p3.addTask(conn,isFinished,userID,taskName,start,end,cat)
                             checkID = p3.checkTaskID(conn,taskName,start,end)
                             if checkID!=None:

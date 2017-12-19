@@ -54,6 +54,7 @@ def getCatColors(conn,userID):
     return d
 
 # create data structure containing information on all of the user's tasks
+# of form [ [{parentDic1},[{childdic1}, {childdic2} ...]], [{parentDic2},[{childdic1}, {childdic2} ...]], ...  ]
 def rightPanelTask(conn,userID):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     getColors = getCatColors(conn,userID)
@@ -106,6 +107,7 @@ def rightPanelTask(conn,userID):
     clean1 = str(finalData).replace('datetime.date(','[')
     clean2 = str(clean1).replace(')',']')
     clean3 = str(clean2).replace('None','0')
+    print clean3
     return clean3
 
 #a helper to build dropdown in base.html
@@ -316,8 +318,6 @@ def addEvent(conn,userID,eventName,eventDate,start,end):
         flash('there seems to be a scheduling conflict')
         return "error"
 
-
-
 def rightPanelEvent(conn,   userID):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from event where userId = %s;',(userID,))
@@ -343,3 +343,17 @@ def rightPanelEvent(conn,   userID):
     clean3 = str(clean2).replace('None','0')
     clean4 = str(clean3).replace('datetime.timedelta(','[')
     return clean4
+
+# helper : check if the input date is legal or not
+def legalDate(inputDate):
+    s = inputDate.split('-')
+    try:
+        if len(s)==3:
+            yr = int(s[0])
+            month = int(s[1])
+            day = int(s[2])
+            return (0<month and month<13 and 0<day and day<32)
+        else:
+            return False
+    except:
+        return False

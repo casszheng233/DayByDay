@@ -24,7 +24,8 @@
     <!-- plugin for nicely designed dropdown selectors -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
-        <script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
+    <!-- canvasJS for log -->
+    <script src="http://cs.wellesley.edu/~czheng/cs304project/canvasjs.min.js"></script>
     <!-- our own js -->
     <script type="text/javascript" src="{{ url_for('static', filename='base_task.js') }}"></script>
 
@@ -43,16 +44,11 @@
 
       body {
         height: 100%;
-        /*font: 1em/1.25 Arial, Helvetica, sans-serif;*/
       }
 
       .form-group{
         width: 60%;
       }
-
-      /*.centerDiv {
-        text-align: center;
-      }*/
 
       .horizontalSpacer{
         display: inline-block;
@@ -70,7 +66,6 @@
       background-color: #FFFFFF;
       width: 15%;
       height: 100%;
-      /*text-align:center;*/
       display: inline-block;
       font-size: 190%;
       vertical-align: middle;
@@ -90,7 +85,6 @@
         background-color: #FFFFFF;
         width: 100%;
         height: 100%;
-        /*border: 1px solid #4286f4;*/
       }
 
       #container1{
@@ -98,7 +92,6 @@
         float: left;
         width: 15%;
         height: 100%;
-        /*border: 1px solid #ff0000;*/
       }
 
       #container2{
@@ -106,13 +99,10 @@
         float: left;
         width: 84.5%;
         height: 100%;
-        /*border: 1px solid #ff0000;*/
       }
 
       #categories{
-        /*text-align:center;*/
         width: 40%;
-        /*border: 1px solid #ff0000;*/
       }
 
       .addElements{
@@ -132,21 +122,17 @@
 
 
 
-
    // create cookies to save user's two drop-down value selections
    function timeChoose(){
      choice = $('#time').find(":selected").val();
      Cookies.set('timeChoice', choice);
-     // console.log(choice);
    }
 
    function dataChoose(){
      choice = $('#views').find(":selected").val();
      Cookies.set('dataChoice', choice);
-     // console.log(choice);
 
      $('#catTickRedirect').val(choice);
-     // console.log($('#catTickRedirect').val());
    }
 
 
@@ -198,28 +184,20 @@
       ids.pop();
       ids.pop();
       Cookies.set('catChoice', ids);
-      // $('#catTickId').val(JSON.stringify(ids));
     }
 
 
     //on page load
     $(document).ready(function() {
 
-    //retrieve the two saved dropdown values
+    //set initial cookies to be 'day' and 'checklist'
     function loadDrops(){
       Cookies.set('timeChoice', "day");
       Cookies.set('dataChoice', "checklist");
       timeChoice = Cookies.get('timeChoice');
       dataChoice = Cookies.get('dataChoice');
-
-       // $("div.time_selector select").val(timeChoice);
-       // console.log("firstload: " + timeChoice);
-
-       // $("div.data_selector select").val(dataChoice);
-       // console.log("firstload: " + dataChoice);
        $('#catTickRedirect').val(dataChoice);
      }
-
      loadDrops();
 
      //retrieve checked categories
@@ -262,7 +240,7 @@
         $('#datetimepicker6').datetimepicker({format: 'YYYY-MM-DD'});
         $('#datetimepicker7').datetimepicker({
             format: 'YYYY-MM-DD',
-            useCurrent: false //Important! See issue #1075
+            useCurrent: false
         });
         $("#datetimepicker6").on("dp.change", function (e) {
             $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
@@ -295,7 +273,6 @@
   </script>
 </head>
 
-<!-- note: some styling is done inline here. This will all be moved to a seperate stylesheet in next stage. -->
 <body>
 
 <div id = "header">
@@ -546,7 +523,6 @@
 
                   <input id="addEventSubmit" class="btn btn-default" style="width:70%;" value="Submit">
 
-
                 </div>
               </div>
             </form>
@@ -562,20 +538,14 @@
               <div id="collapseFive" class="panel-collapse collapse">
                 <div class="panel-body">
 
-
-
                  <input type = "file" name = "file">
+                 <br><p class = "spacer"></p>
 
-                  <input id = "uploadSubmit" class="btn btn-default" type="submit" value="Upload">
-
+                 <input id = "uploadSubmit" class="btn btn-default" type="submit" value="Upload">
 
                 </div>
               </div>
             </form>
-
-
-
-
 
           </div>
           </div>
