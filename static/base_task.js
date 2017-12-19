@@ -1,40 +1,355 @@
-//Ajax Helper Functions -----------------------------------------------------------------------------------------------------
+//Ajax Calls (and pulseMessage) -----------------------------------------------------------------------------------------------------
 
+//displays message in sidebar showing confirmation of success (in blue)
+//or alerting users to errors (in red)
+function pulseMessage(text, color){
+  $('#pulseMessages').css({'color': color, 'border-color': color});
+  $("#pulseMessages").text(text);
+  $('#pulseMessages').finish().show().delay(2000).fadeOut("slow");
+}
 
+//ajax call for selecting a new view in the two dropdowns
+function changeView(){
+  $.ajax({
+			url: '/changeView/',
+			data: $("#changeViewForm").serialize(),
+			type: 'POST',
+			success: function(data){
+        timeChoice = Cookies.get('timeChoice');
+        dataChoice = Cookies.get('dataChoice');
 
-		//help clean data for graph
-    function translatePoints(raw){
-      var result = [];
-      for (i = 0; i < raw.length; i++){
-        rec = raw[i];
-        result.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+        //create views for checklist, if user is at a checklist-view
+        if (dataChoice == "checklist"){
+          dataStruct = JSON.parse(data.replace(/'/g,'"'));
+          if (timeChoice == "day"){
+            packagedTaskDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedTaskWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedTaskMonth(dataStruct);
+          }
+        }
+
+        //create views for events, if user is at a event-view
+        if (dataChoice == "events"){
+          dataStruct = JSON.parse(data.replace(/'/g,'"'));
+          if (timeChoice == "day"){
+            packagedEventDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedEventWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedEventMonth(dataStruct);
+          }
+        }
+
+        //create views for log, if user is at a log-view
+        if (dataChoice == "log"){
+          dataStruct = data;
+          if (timeChoice == "day"){
+            packagedLogDay(dataStruct[0],dataStruct[3]);
+          } else if (timeChoice == "week"){
+            packagedLogDay(dataStruct[1],dataStruct[3]);
+          } else if (timeChoice == "month"){
+            packagedLogDay(dataStruct[2],dataStruct[3]);
+          }
+        }
+				pulseMessage("Swish, changed!","#418ACA");
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+}
+
+//ajax call for ticking a category box in sidebar. Similar to the above changeView() function
+function catTick(){
+  $.ajax({
+			url: '/tickedCats/',
+			data: $("#catTickForm").serialize(),
+			type: 'POST',
+			success: function(data){
+
+        if (data.error){
+          pulseMessage(data.error,'#D9534E');
+          return;
+        }
+
+        timeChoice = Cookies.get('timeChoice');
+        dataChoice = Cookies.get('dataChoice');
+
+        if (dataChoice == "checklist"){
+          dataStruct = JSON.parse(data.replace(/'/g,'"'));
+          if (timeChoice == "day"){
+            packagedTaskDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedTaskWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedTaskMonth(dataStruct);
+          }
+        }
+
+        if (dataChoice == "events"){
+          dataStruct = JSON.parse(data.replace(/'/g,'"'));
+          if (timeChoice == "day"){
+            packagedEventDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedEventWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedEventMonth(dataStruct);
+          }
+        }
+
+        if (dataChoice == "log"){
+          dataStruct = data;
+          if (timeChoice == "day"){
+            packagedLogDay(dataStruct[0],dataStruct[3]);
+          } else if (timeChoice == "week"){
+            packagedLogDay(dataStruct[1],dataStruct[3]);
+          } else if (timeChoice == "month"){
+            packagedLogDay(dataStruct[2],dataStruct[3]);
+          }
+        }
+
+				pulseMessage("Bam, changed!","#418ACA");
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+}
+
+//ajax call for checking a task checkbox
+function tickTaskCall(taskID){
+  $.ajax({
+			url: '/tickTask/',
+			data: $("#taskForm" + taskID).serialize(),
+			type: 'POST',
+			success: function(response){
+				pulseMessage("Success","#418ACA");
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+}
+
+//ajax call for submitting new category
+$(function(){
+  $('#addCategorySubmit').click(function(){
+    $.ajax({
+      url: '/addCat/',
+      data: $("#addCategory").serialize(),
+      type: 'POST',
+      success: function(data){
+
+        //reset accordion
+        $('#collapseOne').collapse('hide');
+        $('#addCategory')[0].reset();
+        $(".selectpicker").selectpicker("refresh");
+
+        //check for errors, and pulse them if they exist
+        if (data.error){
+          pulseMessage(data.error,'#D9534E');
+          return;
+        }
+        pulseMessage("Category Added","#418ACA");
+
+        //update other form dropdowns
+        $('.canUpdateCat').append('<option value="'+data.catName+'">'+data.catName+'</option>');
+
+        //add new category + checkbox
+        var line1 = '<div class="pretty p-default p-curve">';
+        var line2 = '<input type="checkbox" class = "cat" name="cat" id = "cat'+data.catName+'" onchange="checkCat(this,true); this.form.submit();" value="'+data.catName+'" />';
+        var line3 = '<div class="state '+data.catColor+' generatedCat">';
+        var line4 = '<label><font color=" '+data.catColor+'  "> '+data.catName+'  </font></label>';
+        var line5 = '</div></div><br>';
+        $('#catTickForm').append(line1 + line2 + line3 + line4 + line5);
+
+      },
+      error: function(error){
+        console.log(error);
       }
-      return result;
-    }
+    });
+  });
+});
 
-    //a helper function which pushes the dataPoints of a new category to the existing data
-    function makeData(dataList,catName,dataPoints,color){
-      var eachData = {
-            type: "line",
-            showInLegend: true,
-            lineThickness: 2,
-            name: catName,
-            markerType: "square",
-            color: '#'+color,//"#F08080",
-            dataPoints : dataPoints
-          };
-      dataList.push(eachData);
+//ajax call for submitting new task
+$(function(){
+  $('#addTaskSubmit').click(function(){
+    $.ajax({
+      url: '/addTask/',
+      data: $("#addTask").serialize(),
+      type: 'POST',
+      success: function(data){
 
-    }
+        //reset accordion
+        $('#collapseTwo').collapse('hide');
+        $('#addTask')[0].reset();
+        $('#datetimepicker6').data().DateTimePicker.date(null);
+        $('#datetimepicker7').data().DateTimePicker.date(null);
+        $(".selectpicker").selectpicker("refresh");
+        $('#subtasks').empty();
+
+        //error checking and pulsing
+        if (data.error){
+          pulseMessage(data.error,'#D9534E');
+          return;
+        }
+        pulseMessage("Task Added","#418ACA");
+
+        timeChoice = Cookies.get('timeChoice');
+        dataChoice = Cookies.get('dataChoice');
+
+        //get JSON from backend
+        dataStruct = JSON.parse(data.replace(/'/g,'"'));
+
+        //update tasks in the view
+        if (dataChoice == "checklist"){
+          if (timeChoice == "day"){
+            packagedTaskDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedTaskWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedTaskMonth(dataStruct);
+          }
+        }
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+  });
+});
+
+
+//ajax call for submitting new log entry
+$(function(){
+  $('#addLogSubmit').click(function(){
+    $.ajax({
+      url: '/addLog/',
+      data: $("#addLog").serialize(),
+      type: 'POST',
+      success: function(data){
+
+        //reset accordion
+        $('#collapseThree').collapse('hide');
+        $('#addLog')[0].reset();
+        $('#datetimepicker1').data().DateTimePicker.date(null);
+        $(".selectpicker").selectpicker("refresh");
+        $('#hours').empty();
+
+        //error checking/pulsing
+        if (data.error){
+          pulseMessage(data.error,'#D9534E');
+          return;
+        }
+        pulseMessage("Entry Added","#418ACA");
+
+        timeChoice = Cookies.get('timeChoice');
+        dataChoice = Cookies.get('dataChoice');
+
+        var logDicDay = data[0];
+        var logDicWeek = data[1];
+        var logDicMonth = data[2];
+        var colorDic = data[3];
+
+        //update tasks in the view
+        if (dataChoice == "log"){
+          if (timeChoice == "day"){
+            packagedLogDay(logDicDay,colorDic);
+          } else if (timeChoice == "week"){
+            packagedLogWeek(logDicWeek,colorDic);
+          } else if (timeChoice == "month"){
+            packagedLogMonth(logDicMonth,colorDic);
+          }
+        }
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+  });
+});
+
+
+//ajax call for submitting new event
+$(function(){
+  $('#addEventSubmit').click(function(){
+    $.ajax({
+      url: '/addEvent/',
+      data: $("#addEvent").serialize(),
+      type: 'POST',
+      success: function(data){
+
+        //reset accordion
+        $('#collapseFour').collapse('hide');
+        $('#addEvent')[0].reset();
+
+        //error checking and pulsing
+        if (data.error){
+          pulseMessage(data.error,'#D9534E');
+          return;
+        }
+        pulseMessage("Event Added","#418ACA");
+
+        timeChoice = Cookies.get('timeChoice');
+        dataChoice = Cookies.get('dataChoice');
+
+        dataStruct = JSON.parse(data.replace(/'/g,'"'));
+
+        //update tasks in the view
+        if (dataChoice == "events"){
+          if (timeChoice == "day"){
+            packagedEventDay(dataStruct);
+          } else if (timeChoice == "week"){
+            packagedEventWeek(dataStruct);
+          } else if (timeChoice == "month"){
+            packagedEventMonth(dataStruct);
+          }
+        }
+      },
+      error: function(error){
+        console.log(error);
+      }
+    });
+  });
+});
+
+
+
+//Helper Functions for Ajax calls -----------------------------------------------------------------------------------------------------
+
+//Log-related helpers----------------------------------------------------------
+
+//helps clean data for graph
+function translatePoints(raw){
+  var result = [];
+  for (i = 0; i < raw.length; i++){
+    rec = raw[i];
+    result.push({ x: new Date(rec[0],rec[1]-1,rec[2]), y: rec[3] });
+  }
+  return result;
+}
+
+//pushes the dataPoints of a new category to the existing data
+function makeData(dataList,catName,dataPoints,color){
+  var eachData = {
+        type: "line",
+        showInLegend: true,
+        lineThickness: 2,
+        name: catName,
+        markerType: "square",
+        color: '#'+color,
+        dataPoints : dataPoints
+      };
+  dataList.push(eachData);
+}
 
 function packagedLogDay(allLogRec,colorDic){
   $('#container2').empty();
-  console.log($('#container2'))
   $("#container2").append('<div id="chartContainer" style="height: 80%; width: 90%;"></div>');
-  // $("#chartContainer").append('<p> debugging')
-  console.log('here')
   var catChoiceDic = catCookies();
-  var catList = [];//catList is a list of selected categories
+  var catList = []; //catList is a list of selected categories
   for (k in catChoiceDic){
     if (catChoiceDic[k]==true){
       catList.push(k);
@@ -45,26 +360,17 @@ function packagedLogDay(allLogRec,colorDic){
   intType = 'day';
   dateFormat = "MMM/DD/YYYY"
 
-  for (var j = 0 ; j <catList.length; j++){//construct data for each category
-    var actualCat = catList[j].substring(3);//the previous form is 'catXXX', and we are only interested in XXX
-    console.log("allLogREc!!");
-    console.log(allLogRec);
+  for (var j = 0 ; j <catList.length; j++){ //construct data for each category
+    var actualCat = catList[j].substring(3); //the previous form is 'catXXX', and we are only interested in XXX
     if (actualCat in allLogRec){
-      var dataPoints = translatePoints(allLogRec[actualCat]);//prepare data
-      makeData(dataRec,actualCat,dataPoints,colorDic[actualCat]);//append it to our current data list
+      var dataPoints = translatePoints(allLogRec[actualCat]); //prepare data
+      makeData(dataRec,actualCat,dataPoints,colorDic[actualCat]); //append it to our current data list
     }
   }
-  console.log(dataRec);
-  console.log(dateFormat);
-  console.log(intervalGap);
-  console.log(intType);
 	var data = dataRec;
 	var gap = intervalGap;
 	var viewFormat = dateFormat;
 
-  // loadLog(dataRec,dateFormat,intervalGap,intType);//function to call the graph
-	// console.log('loading');
-  //
 		var chart = new CanvasJS.Chart("chartContainer", {
 			title: {
 				text: "Log View",
@@ -136,9 +442,6 @@ function packagedLogWeek(allLogRec,colorDic){
 	var gap = intervalGap;
 	var viewFormat = dateFormat;
 
-  // loadLog(dataRec,dateFormat,intervalGap,intType);//function to call the graph
-	// console.log('loading');
-  //
 		var chart = new CanvasJS.Chart("chartContainer", {
 			title: {
 				text: "Log View",
@@ -178,11 +481,8 @@ function packagedLogWeek(allLogRec,colorDic){
 				}
 			}
 		});
-
 		chart.render();
-
 }
-
 
 
 function packagedLogMonth(allLogRec,colorDic){
@@ -213,9 +513,6 @@ function packagedLogMonth(allLogRec,colorDic){
 	var gap = intervalGap;
 	var viewFormat = dateFormat;
 
-  // loadLog(dataRec,dateFormat,intervalGap,intType);//function to call the graph
-	// console.log('loading');
-  //
 		var chart = new CanvasJS.Chart("chartContainer", {
 			title: {
 				text: "Log View",
@@ -255,13 +552,10 @@ function packagedLogMonth(allLogRec,colorDic){
 				}
 			}
 		});
-
 		chart.render();
-
 }
 
-
-// End log entry functions ---------------------
+//Task-related helpers----------------------------------------------------------
 
 function getMyDate(){
   var today = new Date(),
@@ -272,8 +566,8 @@ function getMyDate(){
   return date;
 }
 
+//set container2 to have the most recent task-day data
 function packagedTaskDay(dataStruct){
-  console.log("packaged taskDay being called!")
   var date = getMyDate();
   $('#container2').empty();
 
@@ -290,15 +584,12 @@ function packagedTaskDay(dataStruct){
     //Extract parent task from data structure for processing
     for (j=0; j < dataStruct.length; j++ ){
       taskDic = dataStruct[j][0];
-      // console.log("placing parent");
-      // console.log(taskDic);
       placeSubtasksHelper(taskDic, true);
 
       //Extract child subTasks from data structure for processing
       for (i=0; i < dataStruct[j][1].length; i++){
           taskDic = dataStruct[j][1][i];
           if (Object.keys(taskDic).length != 0){
-            // console.log("placing child");
             placeSubtasksHelper(taskDic, false);
         }
       }
@@ -307,8 +598,8 @@ function packagedTaskDay(dataStruct){
   placeSubtasks(dataStruct);
 }
 
+//set container2 to have the most recent task-week data
 function packagedTaskWeek(dataStruct){
-  console.log("packaged task week being called!");
   var date = getMyDate();
   $('#container2').empty();
   var catChoiceDic = catCookies();
@@ -363,8 +654,8 @@ function packagedTaskWeek(dataStruct){
     placeSubtasks(dataStruct);
 }
 
+//set container2 to have the most recent task-month data
 function packagedTaskMonth(dataStruct){
-  console.log("packaged taskMonth being called!")
 
   var date = getMyDate();
   $('#container2').empty();
@@ -405,6 +696,9 @@ function packagedTaskMonth(dataStruct){
   oneWeek(aWeek[5], "Tasks", dataStruct, placerHelper);
 }
 
+//Event-related helpers----------------------------------------------------------
+
+//set container2 to have the most recent event-day data
 function packagedEventDay(dataStruct){
   var date = getMyDate();
   $('#container2').empty();
@@ -423,6 +717,7 @@ function packagedEventDay(dataStruct){
   placeEvent(dataStruct);
 }
 
+//set container2 to have the most recent event-week data
 function packagedEventWeek(dataStruct){
     var date = getMyDate();
     $('#container2').empty();
@@ -457,6 +752,7 @@ function packagedEventWeek(dataStruct){
     placeEvents(dataStruct);
 }
 
+//set container2 to have the most recent event-month data
 function packagedEventMonth(dataStruct){
   var date = getMyDate();
   $('#container2').empty();
@@ -481,337 +777,6 @@ function packagedEventMonth(dataStruct){
   oneWeek(thing[5], "Events", dataStruct, placerHelper);
 }
 
-//Ajax-related Functions -----------------------------------------------------------------------------------------------------
-
-function pulseMessage(text, color){
-  $('#pulseMessages').css({'color': color, 'border-color': color});
-  $("#pulseMessages").text(text);
-  $('#pulseMessages').finish().show().delay(2000).fadeOut("slow");
-}
-
-//ajax call for selecting a new view in the two dropdowns
-function changeView(){
-  $.ajax({
-			url: '/changeView/',
-			data: $("#changeViewForm").serialize(),
-			type: 'POST',
-			success: function(data){
-        timeChoice = Cookies.get('timeChoice');
-        dataChoice = Cookies.get('dataChoice');
-
-        if (dataChoice == "checklist"){
-          dataStruct = JSON.parse(data.replace(/'/g,'"'));
-
-          if (timeChoice == "day"){
-            packagedTaskDay(dataStruct);
-          } else if (timeChoice == "week"){
-            packagedTaskWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            packagedTaskMonth(dataStruct);
-          }
-        }
-
-        if (dataChoice == "events"){
-          dataStruct = JSON.parse(data.replace(/'/g,'"'));
-          // dataChoose();
-          if (timeChoice == "day"){
-            packagedEventDay(dataStruct);
-          } else if (timeChoice == "week"){
-            packagedEventWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            packagedEventMonth(dataStruct);
-          }
-        }
-
-        if (dataChoice == "log"){
-          dataStruct = data;
-          if (timeChoice == "day"){
-            packagedLogDay(dataStruct[0],dataStruct[3]);
-          } else if (timeChoice == "week"){
-            packagedLogDay(dataStruct[1],dataStruct[3]);
-          } else if (timeChoice == "month"){
-            packagedLogDay(dataStruct[2],dataStruct[3]);
-          }
-        }
-
-				pulseMessage("Swish, changed!","#418ACA");
-			},
-			error: function(error){
-				console.log(error);
-			}
-		});
-}
-
-//ajax call for ticking a category box in sidebar
-function catTick(){
-  $.ajax({
-			url: '/tickedCats/',
-			data: $("#catTickForm").serialize(),
-			type: 'POST',
-			success: function(data){
-
-        if (data.error){
-          pulseMessage(data.error,'#D9534E');
-          return;
-        }
-
-        timeChoice = Cookies.get('timeChoice');
-        dataChoice = Cookies.get('dataChoice');
-        console.log(timeChoice);
-        console.log(dataChoice);
-
-        if (dataChoice == "checklist"){
-          dataStruct = JSON.parse(data.replace(/'/g,'"'));
-          if (timeChoice == "day"){
-            packagedTaskDay(dataStruct);
-          } else if (timeChoice == "week"){
-            console.log("it's week");
-            packagedTaskWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            console.log("it's month");
-            packagedTaskMonth(dataStruct);
-          }
-        }
-
-        if (dataChoice == "events"){
-          dataStruct = JSON.parse(data.replace(/'/g,'"'));
-          if (timeChoice == "day"){
-            packagedEventDay(dataStruct);
-          } else if (timeChoice == "week"){
-            packagedEventWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            packagedEventMonth(dataStruct);
-          }
-        }
-
-        if (dataChoice == "log"){
-          dataStruct = data;
-          if (timeChoice == "day"){
-            packagedLogDay(dataStruct[0],dataStruct[3]);
-          } else if (timeChoice == "week"){
-            packagedLogDay(dataStruct[1],dataStruct[3]);
-          } else if (timeChoice == "month"){
-            packagedLogDay(dataStruct[2],dataStruct[3]);
-          }
-        }
-
-				pulseMessage("Bam, changed!","#418ACA");
-			},
-			error: function(error){
-				console.log(error);
-			}
-		});
-}
-
-
-
-//ajax call for checking a task checkbox
-function tickTaskCall(taskID){
-  $.ajax({
-			url: '/tickTask/',
-			data: $("#taskForm" + taskID).serialize(),
-			type: 'POST',
-			success: function(response){
-				pulseMessage("Success","#418ACA");
-			},
-			error: function(error){
-				console.log(error);
-			}
-		});
-}
-
-//ajax call for submitting new category
-$(function(){
-  $('#addCategorySubmit').click(function(){
-    $.ajax({
-      url: '/addCat/',
-      data: $("#addCategory").serialize(),
-      type: 'POST',
-      success: function(data){
-
-        //reset accordion
-        $('#collapseOne').collapse('hide');
-        $('#addCategory')[0].reset();
-        $(".selectpicker").selectpicker("refresh");
-
-        if (data.error){
-          pulseMessage(data.error,'#D9534E');
-          return;
-        }
-        pulseMessage("Category Added","#418ACA");
-
-        //update other form dropdowns
-        $('.canUpdateCat').append('<option value="'+data.catName+'">'+data.catName+'</option>');
-
-        //add new category + checkbox
-        var line1 = '<div class="pretty p-default p-curve">';
-        var line2 = '<input type="checkbox" class = "cat" name="cat" id = "cat'+data.catName+'" onchange="checkCat(this,true); this.form.submit();" value="'+data.catName+'" />';
-        var line3 = '<div class="state '+data.catColor+' generatedCat">';
-        var line4 = '<label><font color=" '+data.catColor+'  "> '+data.catName+'  </font></label>';
-        var line5 = '</div></div><br>';
-        $('#catTickForm').append(line1 + line2 + line3 + line4 + line5);
-
-      },
-      error: function(error){
-        console.log(error);
-      }
-    });
-  });
-});
-
-//ajax call for submitting new task
-$(function(){
-  $('#addTaskSubmit').click(function(){
-    $.ajax({
-      url: '/addTask/',
-      data: $("#addTask").serialize(),
-      type: 'POST',
-      success: function(data){
-
-        //reset accordion
-        $('#collapseTwo').collapse('hide');
-        $('#addTask')[0].reset();
-        $('#datetimepicker6').data().DateTimePicker.date(null);
-        $('#datetimepicker7').data().DateTimePicker.date(null);
-        $(".selectpicker").selectpicker("refresh");
-        $('#subtasks').empty();
-
-        if (data.error){
-          pulseMessage(data.error,'#D9534E');
-          return;
-        }
-        pulseMessage("Task Added","#418ACA");
-
-        timeChoice = Cookies.get('timeChoice');
-        dataChoice = Cookies.get('dataChoice');
-
-        dataStruct = JSON.parse(data.replace(/'/g,'"'));
-
-        //update tasks in the view
-        if (dataChoice == "checklist"){
-          if (timeChoice == "day"){
-            packagedTaskDay(dataStruct);
-          } else if (timeChoice == "week"){
-            packagedTaskWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            packagedTaskMonth(dataStruct);
-          }
-        }
-        // console.log(data);
-      },
-      error: function(error){
-        console.log(error);
-      }
-    });
-  });
-});
-
-
-//ajax call for submitting new log
-$(function(){
-  $('#addLogSubmit').click(function(){
-    console.log('reaching addLog');
-    $.ajax({
-      url: '/addLog/',
-      data: $("#addLog").serialize(),
-      type: 'POST',
-      success: function(data){
-
-        $('#collapseThree').collapse('hide');
-        $('#addLog')[0].reset();
-        // $('#addLog')[1].reset();
-        // $('#addLog')[2].reset();
-        // $('#addLog')[3].reset();
-        $('#datetimepicker1').data().DateTimePicker.date(null);
-        $(".selectpicker").selectpicker("refresh");
-        $('#hours').empty();
-
-        if (data.error){
-          pulseMessage(data.error,'#D9534E');
-          return;
-        }
-        pulseMessage("Entry Added","#418ACA");
-
-        timeChoice = Cookies.get('timeChoice');
-        dataChoice = Cookies.get('dataChoice');
-        // rawData = JSON.parse(data.replace(/'/g,'"'));
-        var logDicDay = data[0];
-        var logDicWeek = data[1];
-        var logDicMonth = data[2];
-        var colorDic = data[3];
-        console.log('here')
-        console.log(logDicDay)
-        console.log(logDicWeek)
-        console.log(logDicMonth)
-        console.log(colorDic)
-        //update tasks in the view
-        if (dataChoice == "log"){
-          if (timeChoice == "day"){
-            console.log('log/day')
-            packagedLogDay(logDicDay,colorDic);
-          } else if (timeChoice == "week"){
-            packagedLogWeek(logDicWeek,colorDic);
-          } else if (timeChoice == "month"){
-            packagedLogMonth(logDicMonth,colorDic);
-          }
-        }
-
-        // console.log(data);
-
-      },
-      error: function(error){
-        console.log(error);
-      }
-    });
-  });
-});
-
-
-//ajax call for submitting new event
-$(function(){
-  $('#addEventSubmit').click(function(){
-    $.ajax({
-      url: '/addEvent/',
-      data: $("#addEvent").serialize(),
-      type: 'POST',
-      success: function(data){
-
-        //reset accordion
-        $('#collapseFour').collapse('hide');
-        $('#addEvent')[0].reset();
-
-        if (data.error){
-          pulseMessage(data.error,'#D9534E');
-          return;
-        }
-        pulseMessage("Event Added","#418ACA");
-
-        timeChoice = Cookies.get('timeChoice');
-        dataChoice = Cookies.get('dataChoice');
-
-        dataStruct = JSON.parse(data.replace(/'/g,'"'));
-
-        //update tasks in the view
-        if (dataChoice == "events"){
-          if (timeChoice == "day"){
-            packagedEventDay(dataStruct);
-          } else if (timeChoice == "week"){
-            packagedEventWeek(dataStruct);
-          } else if (timeChoice == "month"){
-            packagedEventMonth(dataStruct);
-          }
-        }
-
-
-      },
-      error: function(error){
-        console.log(error);
-      }
-    });
-  });
-});
-
-
 // Task and Event Functions (mostly related to date handling) ----------------------------------------------------------------------------------------
 
 //find today
@@ -827,7 +792,6 @@ function findToday(){
   $('#headerright').append("Today is: " + month_names[m-1] + " " + d + ", " + y);
   return date;
 }
-
 
 //given a date, returns array of current week's dates in format YYYY,MM,DD for comparison to SQL values
 //Defines a week as last Sunday to Saturday.
@@ -940,8 +904,7 @@ function oneWeek (date, viewSelection, dataStruct, placerHelper){
   var onlyCurrentMonth = displayNames.map((date) => { if (date.split('/')[0] != month){ return ' '; } else { return ('id = ' + date); }});
   displayNames = onlyCurrentMonth;
 
-  //console.log(displayNames);
-  // console.log(displayNames[0]); //really jank please fix
+  // console.log(displayNames[0]); //really jank
   $("#week"+ viewSelection +"").append('<tr style ="height:130px;">' +
                               '<td class="text-center" ' + displayNames[0].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[0].slice(-5) + ' </td>' +
                               '<td class="text-center" ' + displayNames[1].replace("/","_") + ' style="vertical-align:top; border: 1px solid #F5F5F5; text-overflow: ellipsis;"> ' + displayNames[1].slice(-5) + ' </td>' +
@@ -955,7 +918,6 @@ function oneWeek (date, viewSelection, dataStruct, placerHelper){
   for (j=0; j < dataStruct.length; j++ ){
     for (w = 0; w < 7; w++){
       placerHelper(j, dataStruct, week[w], week[w].split(',')[1] + "_" + week[w].split(',')[2]);
-      // console.log(week[w].split(',')[1] + "_" + week[w].split(',')[2]);
     }
   }
 }
@@ -985,7 +947,6 @@ function areChildrenDone(){
       if (Object.keys(subtasks[0]).length != 0){
       let allDone = subtasks.reduce((result,taskDic) =>
           {return (taskDic['isFinished'] && (result))  }, true);
-      // console.log("foldr: " + allDone);
     }
   }
 }
